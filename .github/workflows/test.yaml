@@ -1,0 +1,16 @@
+# TODO: generate empty config/config.ts and run "npm run build"
+
+name: Node.js
+on:
+  push:
+    branches: main
+  pull_request:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+      - run: npm ci
