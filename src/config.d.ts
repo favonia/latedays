@@ -1,0 +1,23 @@
+export const maxLateDays: number;
+export const formDescription: string;
+export const maxAssignmentsForDisplay: number;
+export const itemSelectionQuestion: string;
+export type question<T> = {
+  question: string;
+  options: Record<string, T>;
+};
+export const actionQuestionTexts: question<number>;
+export const selectionQuestionTexts: question<string>;
+export const deadlines: Record<string, Date>;
+export const courseName: string;
+export const session: string;
+export const year: string;
+export const courseEmail: string;
+export const orderedHws: string[];
+export const formName: string;
+export const sheetName: string;
+export const earliestDay: number;
+export const latestDay: number;
+export const token: string;
+export const canvasCourseName: string;
+export const timezone: string;
