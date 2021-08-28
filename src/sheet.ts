@@ -1,4 +1,4 @@
-import config from "./config.js";
+import * as config from "../config/config";
 import form from "./form";
 
 const propSpreadsheetId = "SPREADSHEET_ID";

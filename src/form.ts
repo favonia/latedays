@@ -1,4 +1,4 @@
-import config from "./config.js";
+import * as config from "../config/config";
 
 const propFormId = "FORM_ID";
 
@@ -34,12 +34,8 @@ export function ensure(): GoogleAppsScript.Forms.Form {
   props.setProperty(propFormId, form.getId());
 
   form.setDescription(config.formDescription).setCollectEmail(true);
-  addQuestion(form, config.actionQuestionTexts);
-  addQuestion(
-    form,
-    config.selectionQuestionTexts,
-    config.maxAssignmentsForDisplay
-  );
+  addQuestion(form, config.actionQuestion);
+  addQuestion(form, config.selectionQuestion, config.maxAssignmentsForDisplay);
 
   // create triggers to update the form
   createDeadlineTriggers();

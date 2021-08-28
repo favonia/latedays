@@ -104,5 +104,4 @@ dist
 .tern-port
 
 # App-specific
-# TODO: move config.js to somewhere else
-src/config.js
+config/config.ts
