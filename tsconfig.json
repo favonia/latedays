@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "allowSyntheticDefaultImports": true,
+    "lib": ["esnext"],
+    "target": "es5",
+    "esModuleInterop": true,
+    "strict": true,
+    "resolveJsonModule": true,
+    "experimentalDecorators": true,
+  }
+}

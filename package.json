@@ -1,0 +1,36 @@
+{
+  "name": "latedays",
+  "version": "0.1.0",
+  "description": "Management of late day requests using Google Forms and Google Sheets",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/favonia/latedays.git"
+  },
+  "author": "Favonia",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/favonia/latedays/issues"
+  },
+  "homepage": "https://github.com/favonia/latedays#readme",
+  "devDependencies": {
+    "@types/webpack": "^5.28.0",
+    "@typescript-eslint/eslint-plugin": "^4.29.3",
+    "@typescript-eslint/parser": "^4.29.3",
+    "eslint": "^7.32.0",
+    "eslint-plugin-tsdoc": "^0.2.14",
+    "ts-node": "^10.2.1",
+    "typescript": "^4.3.5",
+    "webpack": "^5.51.1",
+    "webpack-cli": "^4.8.0"
+  },
+  "dependencies": {
+    "@js-temporal/polyfill": "^0.2.0",
+    "@types/google-apps-script": "^1.0.37",
+    "dayjs": "^1.10.6"
+  }
+}
