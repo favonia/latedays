@@ -193,7 +193,7 @@ function sendEmail(req: Request, res: Response, footer: string[]): void {
     "\n"
   );
 
-  GmailApp.createDraft(
+  MailApp.sendEmail(
     req.email,
     subject,
     body,
@@ -205,7 +205,7 @@ function sendEmail(req: Request, res: Response, footer: string[]): void {
       : {
           replyTo: config.courseEmail,
         }
-  ).send();
+  );
 }
 
 /** Validate the student form submission, writes appropriate data into
