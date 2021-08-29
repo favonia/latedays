@@ -4,8 +4,12 @@ import * as form from "./form";
 const propSpreadsheetId = "SPREADSHEET_ID";
 const propDataSheetId = "SHEET_ID";
 
-// global name
+// global name in index.ts
 const callbackNameOnFormSubmit = "callbackOnFormSubmit";
+
+const idHeader = "ID";
+
+let cachedSheet: GoogleAppsScript.Spreadsheet.Sheet | null = null;
 
 function usedHeader(title: string): string {
   return `Used ${title}`;
@@ -16,25 +20,28 @@ function freeHeader(title: string): string {
 }
 
 function initDataSheet(
-  sheet: GoogleAppsScript.Spreadsheet.Sheet
+  ds: GoogleAppsScript.Spreadsheet.Sheet
 ): GoogleAppsScript.Spreadsheet.Sheet {
   try {
-    sheet.setName(config.dataSheetName);
+    ds.setName(config.dataSheetName);
   } catch (e) {
     Logger.log("failed to set the name of the data sheet: " + e);
   }
 
-  const row_header_vals = ["ID"];
-
+  const headers = [idHeader];
   Object.keys(config.deadlines).forEach((assign) => {
-    row_header_vals.push(usedHeader(assign));
-    row_header_vals.push(freeHeader(assign));
+    headers.push(usedHeader(assign));
+    headers.push(freeHeader(assign));
   });
 
-  return sheet.appendRow(row_header_vals);
+  return ds.appendRow(headers);
 }
 
 export function ensure(): GoogleAppsScript.Spreadsheet.Sheet {
+  if (cachedSheet !== null) {
+    return cachedSheet;
+  }
+
   const props = PropertiesService.getScriptProperties();
 
   const [ssId, dsId] = [
@@ -45,12 +52,12 @@ export function ensure(): GoogleAppsScript.Spreadsheet.Sheet {
     const ss = SpreadsheetApp.openById(ssId);
     let ds = ss.getSheets().find((sheet) => sheet.getSheetId() === dsId);
     if (ds === undefined) {
-      Logger.log("The impossible happened: data sheet disappeared.");
+      Logger.log("The impossible happened: the data sheet disappeared.");
       ds = ss.insertSheet();
       initDataSheet(ds);
       props.setProperty(propDataSheetId, ds.getSheetId().toString());
     }
-    return ds;
+    return (cachedSheet = ds);
   }
 
   const ss = SpreadsheetApp.create(config.spreadsheetName);
@@ -60,7 +67,7 @@ export function ensure(): GoogleAppsScript.Spreadsheet.Sheet {
 
   // link the form
   form.ensure().setDestination(FormApp.DestinationType.SPREADSHEET, ss.getId());
-  // trigger on submission
+  // set up trigger on submission
   ScriptApp.newTrigger(callbackNameOnFormSubmit)
     .forSpreadsheet(ss)
     .onFormSubmit()
@@ -75,7 +82,7 @@ export function ensure(): GoogleAppsScript.Spreadsheet.Sheet {
   props.setProperty(propSpreadsheetId, ss.getId());
   props.setProperty(propDataSheetId, ds.getSheetId().toString());
 
-  return ds;
+  return (cachedSheet = ds);
 }
 
 // init guarantees that the sheet exists and is initialized
@@ -83,76 +90,72 @@ export function init(): void {
   ensure();
 }
 
-export type Entry = Record<string, { used: number; free: number }>;
+export type Entry = {
+  rowIndex: number;
+  days: Record<string, { used: number; free: number }>;
+};
 
-function getHeaders(ds: GoogleAppsScript.Spreadsheet.Sheet): string[] {
-  return ds.getRange(1, 1, 1, ds.getLastColumn()).getValues()[0].map(String);
+function getHeaders(values: any[][]): string[] {
+  return values[0].map(String);
 }
 
 /**
  * the first student has the index 0 (though the data would be at the second row)
  * @return 0-indexed row numbers, or -1 if not found
  */
-function getRowIndex(
-  ds: GoogleAppsScript.Spreadsheet.Sheet,
-  id: string
-): number {
-  return ds
-    .getRange(1, 1, ds.getLastRow(), 1)
-    .getValues()
-    .slice(1) // remove the header; Range still starts from 1 to avoid empty ranges
-    .findIndex((row) => String(row[0]) === id);
+function getRowIndex(values: any[][], id: string): number {
+  // .slice(1) remove the header; Range still starts from 1 to avoid empty ranges
+  return values.slice(1).findIndex((row) => String(row[0]) === id);
 }
 
 export function readRecord(
   ds: GoogleAppsScript.Spreadsheet.Sheet,
   id: string
 ): Entry {
-  const headers = getHeaders(ds);
-  let rowIndex = getRowIndex(ds, id);
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+
+  const values = ds
+    .getRange(1, 1, ds.getLastRow(), ds.getLastColumn())
+    .getValues();
+  const headers = getHeaders(values);
+  let rowIndex = getRowIndex(values, id);
+  let row: any[] = [];
 
   if (rowIndex === -1) {
-    ds.appendRow(headers.map((_, index) => (index === 0 ? id : 0)));
-
-    let entry: Entry = {};
-    Object.keys(config.deadlines).forEach(function (assign) {
-      entry[assign] = { used: 0, free: 0 };
-    });
-
-    return entry;
+    row = headers.map((_, i) => (i === 0 ? id : 0));
+    ds.appendRow(row);
+    rowIndex = values.length;
+    lock.releaseLock();
   } else {
-    const row = ds
-      .getRange(1 + rowIndex + 1, 1, 1, ds.getLastColumn())
-      .getValues()[0];
-
-    let entry: Entry = {};
-    Object.keys(config.deadlines).forEach(function (assign) {
-      entry[assign] = {
-        used: Number(row[headers.indexOf(usedHeader(assign))]),
-        free: Number(row[headers.indexOf(freeHeader(assign))]),
-      };
-    });
-
-    return entry;
+    lock.releaseLock();
+    row = values[rowIndex + 1];
   }
+
+  // XXX O(n^2) for remapping
+  const entry: Entry = { rowIndex: rowIndex, days: {} };
+  Object.keys(config.deadlines).forEach(function (assign) {
+    entry.days[assign] = {
+      used: Number(row[headers.indexOf(usedHeader(assign))]),
+      free: Number(row[headers.indexOf(freeHeader(assign))]),
+    };
+  });
+
+  return entry;
 }
 
-export function writeRecord(
+export function updateRecord(
   ds: GoogleAppsScript.Spreadsheet.Sheet,
-  id: string,
   entry: Entry
 ): void {
-  const headers = getHeaders(ds);
-  let rowIndex = getRowIndex(ds, id);
+  const lastColumn = ds.getLastColumn();
+  const headers = getHeaders(ds.getRange(1, 1, 1, lastColumn).getValues());
 
-  if (rowIndex === -1) {
-    Logger.log("The entry for %s was removed.", id);
-    return;
-  }
+  const range = ds.getRange(1 + entry.rowIndex + 1, 1, 1, lastColumn);
 
-  const range = ds.getRange(1 + rowIndex + 1, 1, 1, ds.getLastColumn());
+  // XXX O(n^2) for remapping
   let row: string[] = range.getValues()[0].map(String);
-  Object.entries(entry).forEach(function ([assign, days]) {
+  Object.entries(entry.days).forEach(function ([assign, days]) {
     row[headers.indexOf(usedHeader(assign))] = String(days.used);
     row[headers.indexOf(freeHeader(assign))] = String(days.free);
   });

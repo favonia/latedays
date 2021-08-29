@@ -18,33 +18,28 @@ type Response = {
 
 function formatSummary(entry: sheet.Entry): string[] {
   const latedays: string[] = [];
-  Object.keys(config.deadlines).forEach((assign) => {
-    const used = entry[assign].used;
-    const free = entry[assign].free;
-    if (used + free > 0) {
-      let line = `${assign}: ${used + free}`;
-      if (free > 0) {
-        line += ` (including ${free} free late day(s))`;
-      }
-      latedays.push(line);
+  Object.entries(entry.days).forEach(([assign, days]) => {
+    if (days.used + days.free > 0) {
+      latedays.push(
+        `${assign}: ${days.used + days.free}` +
+          (days.free > 0 ? ` (including ${days.free} free late day(s))` : "")
+      );
     }
   });
 
   let remaining =
     config.maxLateDays -
-    Object.keys(config.deadlines)
-      .map((assign) => entry[assign].used)
+    Object.values(entry.days)
+      .map((days) => days.used)
       .reduce((a, b) => a + b, 0);
 
-  if (latedays.length > 0) {
-    return [
-      "Late day(s) applied:",
-      ...latedays,
-      `Remaining late day(s): ${remaining}`,
-    ];
-  } else {
-    return [`No late day spent.`];
-  }
+  return latedays.length > 0
+    ? [
+        "Late day(s) applied:",
+        ...latedays,
+        `Remaining late day(s): ${remaining}`,
+      ]
+    : [`No late days spent.`];
 }
 
 /**
@@ -72,14 +67,13 @@ function updateAndRespond(entry: sheet.Entry, request: Request): Response {
 
   const remaining =
     config.maxLateDays -
-    Object.keys(config.deadlines)
-      .map((assign) => entry[assign].used)
+    Object.values(entry.days)
+      .map((days) => days.used)
       .reduce((a, b) => a + b, 0);
 
-  const oldUsed = entry[assignment].used;
-
-  const free = entry[assignment].free;
-  const msgFree =
+  const used = entry.days[assignment].used;
+  const free = entry.days[assignment].free;
+  const freeDaysMessage =
     free > 0
       ? [`You also received ${free} free late day(s) for ${assignment}.`]
       : [];
@@ -93,7 +87,7 @@ function updateAndRespond(entry: sheet.Entry, request: Request): Response {
   } else if (request.action < 0) {
     // refund
     const newDeadlineWithoutFreeDays = deadline.addDays(
-      Math.max(0, oldUsed + request.action)
+      Math.max(0, used + request.action)
     );
     if (request.time.isAfter(deadline.addDays(config.refundPeriodInDays))) {
       return {
@@ -106,7 +100,7 @@ function updateAndRespond(entry: sheet.Entry, request: Request): Response {
           `Please check the rules in the syllabus.`,
         ],
       };
-    } else if (oldUsed === 0) {
+    } else if (used === 0) {
       return {
         subject: `Late day refund request for ${assignment} rejected`,
         body: [
@@ -127,17 +121,17 @@ function updateAndRespond(entry: sheet.Entry, request: Request): Response {
       };
     } else {
       const newDeadline = newDeadlineWithoutFreeDays.addDays(free);
-      entry[assignment].used = Math.max(0, oldUsed + request.action);
+      entry.days[assignment].used = Math.max(0, used + request.action);
       return {
         subject: `Late day request for ${assignment} approved: new deadline ${time.format(
           newDeadline
         )}`,
         body: [
           `This is a confirmation that you got ${Math.min(
-            oldUsed,
+            used,
             -request.action
           )} late day(s) refunded for ${assignment}.`,
-          ...msgFree,
+          ...freeDaysMessage,
           `The original deadline for ${assignment} is ${time.format(
             deadline
           )}.`,
@@ -158,11 +152,11 @@ function updateAndRespond(entry: sheet.Entry, request: Request): Response {
           `Please check the rules in the syllabus.`,
         ],
       };
-    } else if (request.action < oldUsed) {
+    } else if (request.action < used) {
       return {
         subject: `Late day request for ${assignment} rejected`,
         body: [
-          `You've already spent ${oldUsed} late day(s), so you cannot request fewer late day(s).`,
+          `You've already spent ${used} late day(s), so you cannot request fewer late day(s).`,
           `For refund, please choose the refund options.`,
         ],
       };
@@ -175,14 +169,14 @@ function updateAndRespond(entry: sheet.Entry, request: Request): Response {
       };
     } else {
       const newDeadline = deadline.addDays(request.action + free);
-      entry[assignment].used = request.action;
+      entry.days[assignment].used = request.action;
       return {
         subject: `Late day request for ${assignment} approved: new deadline ${time.format(
           newDeadline
         )}`,
         body: [
           `This is a confirmation that you spent ${request.action} day(s) for ${assignment}.`,
-          ...msgFree,
+          ...freeDaysMessage,
           `The original deadline for ${assignment} is ${time.format(
             deadline
           )}.`,
@@ -195,11 +189,9 @@ function updateAndRespond(entry: sheet.Entry, request: Request): Response {
 
 function sendEmail(req: Request, res: Response, footer: string[]): void {
   const subject = `${config.emailSubjectPrefix} ${res.subject}`;
-  const body = (
-    res.body.length > 0 && footer.length > 0
-      ? [...res.body, , ...footer]
-      : [...res.body, ...footer]
-  ).join("\n");
+  const body = (res.body.length > 0 ? [...res.body, , ...footer] : footer).join(
+    "\n"
+  );
 
   GmailApp.createDraft(
     req.email,
@@ -229,7 +221,7 @@ export function handle(
   const ds = sheet.ensure();
   const entry = sheet.readRecord(ds, request.id);
   const response = updateAndRespond(entry, request);
-  sheet.writeRecord(ds, request.id, entry);
+  sheet.updateRecord(ds, entry);
 
   const usageSummary = formatSummary(entry);
   sendEmail(request, response, usageSummary);

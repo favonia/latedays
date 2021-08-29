@@ -2,6 +2,8 @@ import * as config from "../config/config";
 
 const propFormId = "FORM_ID";
 
+let cachedForm: GoogleAppsScript.Forms.Form | null = null;
+
 // Update the form with items around today.
 function createDeadlineTriggers(): void {
   // TODO
@@ -18,11 +20,15 @@ function addQuestion<T>(
 }
 
 export function ensure(): GoogleAppsScript.Forms.Form {
+  if (cachedForm !== null) {
+    return cachedForm;
+  }
+
   const props = PropertiesService.getScriptProperties();
 
   const id = props.getProperty(propFormId);
   if (id != null) {
-    return FormApp.openById(id);
+    return (cachedForm = FormApp.openById(id));
   }
 
   const form = FormApp.create(config.formName);
@@ -35,7 +41,7 @@ export function ensure(): GoogleAppsScript.Forms.Form {
   // create triggers to update the form
   createDeadlineTriggers();
 
-  return form;
+  return (cachedForm = form);
 }
 
 export function init(): void {
