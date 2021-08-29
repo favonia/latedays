@@ -66,7 +66,7 @@ function parseFormSubmission(v: Record<string, string[]>): Request {
   };
 }
 
-function validate(entry: sheet.Entry, request: Request): Response {
+function updateAndRespond(entry: sheet.Entry, request: Request): Response {
   const assignment = request.assignment;
   const deadline = time.newTime(config.deadlines[assignment]);
 
@@ -101,7 +101,7 @@ function validate(entry: sheet.Entry, request: Request): Response {
         body: [
           `It is too late to request the refund for ${assignment}.`,
           `The request should be sent before ${time.format(
-            deadline.addDays(7)
+            deadline.addDays(config.refundPeriodInDays)
           )}.`,
           `Please check the rules in the syllabus.`,
         ],
@@ -228,10 +228,9 @@ export function handle(
 
   const ds = sheet.ensure();
   const entry = sheet.readRecord(ds, request.id);
-
-  const response = validate(entry, request);
+  const response = updateAndRespond(entry, request);
   sheet.writeRecord(ds, request.id, entry);
-  const usageSummary = formatSummary(entry);
 
+  const usageSummary = formatSummary(entry);
   sendEmail(request, response, usageSummary);
 }
