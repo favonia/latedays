@@ -145,8 +145,12 @@ export function writeRecord(
   const headers = getHeaders(ds);
   let rowIndex = getRowIndex(ds, id);
 
-  const range = ds.getRange(1 + rowIndex + 1, 1, 1, ds.getLastColumn());
+  if ( rowIndex === -1 ) { 
+    Logger.log("The entry for %s was removed.", id)
+    return
+  }
 
+  const range = ds.getRange(1 + rowIndex + 1, 1, 1, ds.getLastColumn());
   let row: string[] = range.getValues()[0].map(String);
   Object.entries(entry).forEach(function ([assign, days]) {
     row[headers.indexOf(usedHeader(assign))] = String(days.used);
