@@ -9,17 +9,12 @@ function createDeadlineTriggers(): void {
 
 function addQuestion<T>(
   form: GoogleAppsScript.Forms.Form,
-  q: config.question<T>,
-  maxAssignmentsForDisplay?: number
+  q: config.Question<T>
 ): void {
-  var item = form.addMultipleChoiceItem();
+  const item = form.addMultipleChoiceItem();
   item.setTitle(q.question);
   item.setRequired(true);
-  item.setChoices(
-    Object.keys(q.options)
-      .map(item.createChoice)
-      .slice(0, maxAssignmentsForDisplay)
-  );
+  item.setChoices(Object.keys(q.options).map(item.createChoice));
 }
 
 export function ensure(): GoogleAppsScript.Forms.Form {
@@ -35,7 +30,7 @@ export function ensure(): GoogleAppsScript.Forms.Form {
 
   form.setDescription(config.formDescription).setCollectEmail(true);
   addQuestion(form, config.actionQuestion);
-  addQuestion(form, config.selectionQuestion, config.maxAssignmentsForDisplay);
+  addQuestion(form, config.selectionQuestion);
 
   // create triggers to update the form
   createDeadlineTriggers();
@@ -43,4 +38,6 @@ export function ensure(): GoogleAppsScript.Forms.Form {
   return form;
 }
 
-export default { ensure };
+export function init(): void {
+  ensure();
+}

@@ -1,10 +1,21 @@
 import * as config from "../config/config";
-import form from "./form";
+import * as form from "./form";
 
 const propSpreadsheetId = "SPREADSHEET_ID";
 const propDataSheetId = "SHEET_ID";
 
-function prepareDataSheet(
+// global name
+const callbackNameOnFormSubmit = "callbackOnFormSubmit";
+
+function usedHeader(title: string): string {
+  return `Used ${title}`;
+}
+
+function freeHeader(title: string): string {
+  return `Free ${title}`;
+}
+
+function initDataSheet(
   sheet: GoogleAppsScript.Spreadsheet.Sheet
 ): GoogleAppsScript.Spreadsheet.Sheet {
   try {
@@ -15,20 +26,15 @@ function prepareDataSheet(
 
   const row_header_vals = ["ID"];
 
-  Object.keys(config.deadlines).forEach((hw) => {
-    row_header_vals.push(`${hw}`);
-    row_header_vals.push(`Free ${hw}`);
+  Object.keys(config.deadlines).forEach((assign) => {
+    row_header_vals.push(usedHeader(assign));
+    row_header_vals.push(freeHeader(assign));
   });
 
   return sheet.appendRow(row_header_vals);
 }
 
-export function ensure(
-  entrypoint: (event: GoogleAppsScript.Events.SheetsOnFormSubmit) => void
-): [
-  GoogleAppsScript.Spreadsheet.Spreadsheet,
-  GoogleAppsScript.Spreadsheet.Sheet
-] {
+export function ensure(): GoogleAppsScript.Spreadsheet.Sheet {
   const props = PropertiesService.getScriptProperties();
 
   const [ssId, dsId] = [
@@ -41,33 +47,94 @@ export function ensure(
     if (ds === undefined) {
       Logger.log("The impossible happened: data sheet disappeared.");
       ds = ss.insertSheet();
-      prepareDataSheet(ds);
+      initDataSheet(ds);
       props.setProperty(propDataSheetId, ds.getSheetId().toString());
     }
-    return [ss, ds];
+    return ds;
   }
 
   const ss = SpreadsheetApp.create(config.spreadsheetName);
-  const ds = ss.getSheets()[0];
-
-  // prepare the data sheet
-  prepareDataSheet(ds);
 
   // set the timezone
   ss.setSpreadsheetTimeZone(config.timezone);
 
   // link the form
   form.ensure().setDestination(FormApp.DestinationType.SPREADSHEET, ss.getId());
-
   // trigger on submission
-  ScriptApp.newTrigger(entrypoint.name)
+  ScriptApp.newTrigger(callbackNameOnFormSubmit)
     .forSpreadsheet(ss)
     .onFormSubmit()
     .create();
+
+  const ds = ss.getSheets()[0];
+
+  // prepare the data sheet
+  initDataSheet(ds);
 
   // remember the IDs
   props.setProperty(propSpreadsheetId, ss.getId());
   props.setProperty(propDataSheetId, ds.getSheetId().toString());
 
-  return [ss, ds];
+  return ds;
+}
+
+// init guarantees that the sheet exists and is initialized
+export function init(): void {
+  ensure();
+}
+
+type Entry = {
+  rowNum: number;
+  id: string;
+  days: Record<string, { used: number; free: number }>;
+};
+
+export function readRecord(id: string): Entry {
+  const ds = ensure();
+
+  const header = ds.getRange(1, 1, 1, ds.getLastColumn()).getValues()[0];
+
+  let rowNum = ds
+    .getRange(1, 1, ds.getLastRow(), 1)
+    .getValues()
+    .slice(1)
+    .findIndex((row) => String(row[0]) === id);
+  if (rowNum === -1) {
+    let row = header.map((_, index) => (index === 0 ? id : 0));
+    ds.appendRow(row);
+    rowNum = ds
+      .getRange(1, 1, ds.getLastRow(), 1)
+      .getValues()
+      .slice(1)
+      .findIndex((row) => String(row[0]) === id);
+
+    let days: Record<string, { used: number; free: number }> = {};
+    Object.keys(config.deadlines).forEach(function (assign) {
+      days[assign] = { used: 0, free: 0 };
+    });
+
+    return {
+      rowNum: rowNum,
+      id: id,
+      days: days,
+    };
+  } else {
+    const row = ds
+      .getRange(1 + rowNum + 1, 1, 1, ds.getLastColumn())
+      .getValues()[0];
+
+    let days: Record<string, { used: number; free: number }> = {};
+    Object.keys(config.deadlines).forEach(function (assign) {
+      days[assign] = {
+        used: Number(row[header.indexOf(usedHeader(assign))]),
+        free: Number(row[header.indexOf(freeHeader(assign))]),
+      };
+    });
+
+    return {
+      rowNum: rowNum,
+      id: id,
+      days: days,
+    };
+  }
 }

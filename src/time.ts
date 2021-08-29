@@ -9,7 +9,11 @@ dayjs.extend(timezone);
 dayjs.tz.setDefault(config.timezone);
 
 // The type of time across the scripts.
-export type time = dayjs.Dayjs;
+export type Time = dayjs.Dayjs;
+
+export function newTime(date?: string | Date | Time): Time {
+  return dayjs(date);
+}
 
 /**
  * Return the new deadline after applying the given late days.
@@ -21,6 +25,6 @@ export type time = dayjs.Dayjs;
  * @param original - the original deadline.
  * @param days - the number of applied late days.
  */
-export function addDays(original: time, days: number): time {
+export function addDays(original: Time, days: number): Time {
   return dayjs.max(original.add(days, "day"), original.add(days * 24, "hour"));
 }
