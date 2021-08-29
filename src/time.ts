@@ -22,9 +22,19 @@ export function newTime(date?: string | Date | Time): Time {
  * use the latest possible deadline among different calculation
  * methods. The most common reason is daylight saving changes.
  *
- * @param original - the original deadline.
  * @param days - the number of applied late days.
  */
-export function addDays(original: Time, days: number): Time {
-  return dayjs.max(original.add(days, "day"), original.add(days * 24, "hour"));
+declare module "dayjs" {
+  export interface Dayjs {
+    addDays(days: number): Time;
+  }
+}
+dayjs.extend((_options, dayjsClass, _dayjsFactory) => {
+  dayjsClass.prototype.addDays = function (days: number): Time {
+    return dayjs.max(this.add(days, "day"), this.add(days * 24, "hour"));
+  };
+});
+
+export function format(t: Time): string {
+  return t.format("YYYY/MM/DD HH:mm:ss");
 }
