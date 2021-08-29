@@ -83,7 +83,7 @@ export function init(): void {
   ensure();
 }
 
-type Entry = Record<string, { used: number; free: number }>;
+export type Entry = Record<string, { used: number; free: number }>;
 
 function getHeaders(ds: GoogleAppsScript.Spreadsheet.Sheet): string[] {
   return ds.getRange(1, 1, 1, ds.getLastColumn()).getValues()[0].map(String);
@@ -145,9 +145,9 @@ export function writeRecord(
   const headers = getHeaders(ds);
   let rowIndex = getRowIndex(ds, id);
 
-  if ( rowIndex === -1 ) { 
-    Logger.log("The entry for %s was removed.", id)
-    return
+  if (rowIndex === -1) {
+    Logger.log("The entry for %s was removed.", id);
+    return;
   }
 
   const range = ds.getRange(1 + rowIndex + 1, 1, 1, ds.getLastColumn());
