@@ -174,10 +174,6 @@ function validate(entry: sheet.Entry, request: Request): Response {
         ],
       };
     } else {
-      const msgFree =
-        free > 0
-          ? [`You also received ${free} free late day(s) for ${assignment}.`]
-          : [];
       const newDeadline = deadline.addDays(request.action + free);
       entry[assignment].used = request.action;
       return {
