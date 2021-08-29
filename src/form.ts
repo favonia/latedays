@@ -16,7 +16,7 @@ function addQuestion<T>(
   const item = form.addMultipleChoiceItem();
   item.setTitle(q.question);
   item.setRequired(true);
-  item.setChoices(Object.keys(q.options).map(item.createChoice));
+  item.setChoices(Object.keys(q.options).map((text) => item.createChoice(text)));
 }
 
 export function ensure(): GoogleAppsScript.Forms.Form {
