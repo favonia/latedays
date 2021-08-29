@@ -37,6 +37,11 @@ function initDataSheet(
   return ds.appendRow(headers);
 }
 
+export function reset(): void {
+  const props = PropertiesService.getScriptProperties();
+  props.deleteProperty(propSpreadsheetId).deleteProperty(propDataSheetId);
+}
+
 export function ensure(): GoogleAppsScript.Spreadsheet.Sheet {
   if (cachedSheet !== null) {
     return cachedSheet;
@@ -49,19 +54,20 @@ export function ensure(): GoogleAppsScript.Spreadsheet.Sheet {
     Number(props.getProperty(propDataSheetId)),
   ];
   if (ssId !== null && dsId !== null) {
-    const ss = SpreadsheetApp.openById(ssId);
-    let ds = ss.getSheets().find((sheet) => sheet.getSheetId() === dsId);
-    if (ds === undefined) {
-      Logger.log("The impossible happened: the data sheet disappeared.");
-      ds = ss.insertSheet();
-      initDataSheet(ds);
-      props.setProperty(propDataSheetId, ds.getSheetId().toString());
-    }
-    return (cachedSheet = ds);
+    try {
+      const ss = SpreadsheetApp.openById(ssId);
+      let ds = ss.getSheets().find((sheet) => sheet.getSheetId() === dsId);
+      if (ds === undefined) {
+        Logger.log("The impossible happened: the data sheet disappeared.");
+        ds = ss.insertSheet();
+        initDataSheet(ds);
+        props.setProperty(propDataSheetId, ds.getSheetId().toString());
+      }
+      return (cachedSheet = ds);
+    } catch (_) {}
   }
 
   const ss = SpreadsheetApp.create(config.spreadsheetName);
-
   // set the timezone
   ss.setSpreadsheetTimeZone(config.timezone);
 
@@ -79,8 +85,9 @@ export function ensure(): GoogleAppsScript.Spreadsheet.Sheet {
   initDataSheet(ds);
 
   // remember the IDs
-  props.setProperty(propSpreadsheetId, ss.getId());
-  props.setProperty(propDataSheetId, ds.getSheetId().toString());
+  props
+    .setProperty(propSpreadsheetId, ss.getId())
+    .setProperty(propDataSheetId, ds.getSheetId().toString());
 
   return (cachedSheet = ds);
 }

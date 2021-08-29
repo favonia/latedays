@@ -14,9 +14,14 @@ function addQuestion<T>(
   q: config.Question<T>
 ): void {
   const item = form.addMultipleChoiceItem();
-  item.setTitle(q.question);
-  item.setRequired(true);
-  item.setChoices(Object.keys(q.options).map(item.createChoice));
+  item
+    .setTitle(q.question)
+    .setRequired(true)
+    .setChoices(Object.keys(q.options).map((text) => item.createChoice(text)));
+}
+
+export function reset(): void {
+  PropertiesService.getScriptProperties().deleteProperty(propFormId);
 }
 
 export function ensure(): GoogleAppsScript.Forms.Form {
@@ -28,7 +33,9 @@ export function ensure(): GoogleAppsScript.Forms.Form {
 
   const id = props.getProperty(propFormId);
   if (id != null) {
-    return (cachedForm = FormApp.openById(id));
+    try {
+      return (cachedForm = FormApp.openById(id));
+    } catch (_) {}
   }
 
   const form = FormApp.create(config.formName);
