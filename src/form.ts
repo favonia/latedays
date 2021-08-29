@@ -4,6 +4,9 @@ const propFormId = "FORM_ID";
 
 let cachedForm: GoogleAppsScript.Forms.Form | null = null;
 
+// global name in index.ts
+const callbackNameOnFormSubmit = "callbackOnFormSubmit";
+
 // Update the form with items around today.
 function createDeadlineTriggers(): void {
   // TODO
@@ -15,13 +18,21 @@ function addQuestion<T>(
 ): void {
   const item = form.addMultipleChoiceItem();
   item
-    .setTitle(q.question)
+    .setTitle(q.title)
     .setRequired(true)
-    .setChoices(Object.keys(q.options).map((text) => item.createChoice(text)));
+    .setChoices(Object.keys(q.choices).map((text) => item.createChoice(text)));
 }
 
 export function reset(): void {
-  PropertiesService.getScriptProperties().deleteProperty(propFormId);
+  const props = PropertiesService.getScriptProperties();
+  const id = props.getProperty(propFormId);
+  if (id !== null) {
+    const form = FormApp.openById(id);
+    ScriptApp.getUserTriggers(form).forEach((trigger) =>
+      ScriptApp.deleteTrigger(trigger)
+    );
+    props.deleteProperty(propFormId);
+  }
 }
 
 export function ensure(): GoogleAppsScript.Forms.Form {
@@ -39,15 +50,21 @@ export function ensure(): GoogleAppsScript.Forms.Form {
   }
 
   const form = FormApp.create(config.formName);
-  props.setProperty(propFormId, form.getId());
 
   form.setDescription(config.formDescription).setCollectEmail(true);
   addQuestion(form, config.actionQuestion);
   addQuestion(form, config.selectionQuestion);
 
+  // set up trigger on submission
+  ScriptApp.newTrigger(callbackNameOnFormSubmit)
+    .forForm(form)
+    .onFormSubmit()
+    .create();
+
   // create triggers to update the form
   createDeadlineTriggers();
 
+  props.setProperty(propFormId, form.getId());
   return (cachedForm = form);
 }
 

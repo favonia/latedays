@@ -5,7 +5,7 @@ import * as sheet from "./sheet";
 type Request = {
   id: string;
   email: string;
-  assignment: string;
+  assignment: config.Assignment;
   action: number;
   time: time.Time;
 };
@@ -35,11 +35,14 @@ function formatSummary(entry: sheet.Entry): string[] {
 
   return latedays.length > 0
     ? [
-        "Late day(s) applied:",
+        "You have applied these late day(s):",
         ...latedays,
         `Remaining late day(s): ${remaining}`,
       ]
-    : [`No late days spent.`];
+    : [
+        `You have not spent any late day.`,
+        `Remaining late day(s): ${remaining}`,
+      ];
 }
 
 /**
@@ -50,14 +53,25 @@ function idOfEmail(email: string): string {
   return email.match(/^([^@]*)@/)![1];
 }
 
-function parseFormSubmission(v: Record<string, string[]>): Request {
+function extractQuetionResponse<T>(
+  q: config.Question<T>,
+  rs: GoogleAppsScript.Forms.ItemResponse[]
+): T {
+  return q.choices[
+    rs
+      .find((ir) => ir.getItem().getTitle() === q.title)!
+      .getResponse() as string
+  ];
+}
+
+function parseFormSubmission(r: GoogleAppsScript.Forms.FormResponse): Request {
+  const rs = r.getItemResponses();
   return {
-    id: idOfEmail(v["Email Address"][0]),
-    email: v["Email Address"][0],
-    assignment:
-      config.selectionQuestion.options[v[config.selectionQuestion.question][0]],
-    action: config.actionQuestion.options[v[config.actionQuestion.question][0]],
-    time: time.newTime(v["Timestamp"][0]),
+    id: idOfEmail(r.getRespondentEmail()),
+    email: r.getRespondentEmail(),
+    assignment: extractQuetionResponse(config.selectionQuestion, rs),
+    action: extractQuetionResponse(config.actionQuestion, rs),
+    time: time.newTime(r.getTimestamp().toISOString()),
   };
 }
 
@@ -94,7 +108,7 @@ function updateAndRespond(entry: sheet.Entry, request: Request): Response {
         subject: `Late day refund request for ${assignment} rejected`,
         body: [
           `It is too late to request the refund for ${assignment}.`,
-          `The request should be sent before ${time.format(
+          `The request should have been made by ${time.format(
             deadline.addDays(config.refundPeriodInDays)
           )}.`,
           `Please check the rules in the syllabus.`,
@@ -146,7 +160,7 @@ function updateAndRespond(entry: sheet.Entry, request: Request): Response {
         subject: `Late day request rejected`,
         body: [
           `It is too late to request late days for ${assignment}.`,
-          `The request should be sent before ${time.format(
+          `The request should have been made by ${time.format(
             deadline.addDays(config.requestPeriodInDays)
           )}.`,
           `Please check the rules in the syllabus.`,
@@ -213,10 +227,8 @@ function sendEmail(req: Request, res: Response, footer: string[]): void {
  **
  ** TODO: Auto-update the deadline on Canvas
  **/
-export function handle(
-  event: GoogleAppsScript.Events.SheetsOnFormSubmit
-): void {
-  const request = parseFormSubmission(event.namedValues);
+export function handle(event: GoogleAppsScript.Events.FormsOnFormSubmit): void {
+  const request = parseFormSubmission(event.response);
 
   const lock = LockService.getScriptLock();
   lock.waitLock(30000);
