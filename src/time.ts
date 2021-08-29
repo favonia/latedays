@@ -1,4 +1,4 @@
-import config from "./config.js";
+import * as config from "../config/config";
 
 import dayjs from "dayjs";
 import minMax from "dayjs/plugin/minMax";
@@ -9,7 +9,11 @@ dayjs.extend(timezone);
 dayjs.tz.setDefault(config.timezone);
 
 // The type of time across the scripts.
-export type time = dayjs.Dayjs;
+export type Time = dayjs.Dayjs;
+
+export function newTime(date?: string | Date | Time): Time {
+  return dayjs(date);
+}
 
 /**
  * Return the new deadline after applying the given late days.
@@ -18,9 +22,19 @@ export type time = dayjs.Dayjs;
  * use the latest possible deadline among different calculation
  * methods. The most common reason is daylight saving changes.
  *
- * @param original - the original deadline.
  * @param days - the number of applied late days.
  */
-export function addDays(original: time, days: number): time {
-  return dayjs.max(original.add(days, "day"), original.add(days * 24, "hour"));
+declare module "dayjs" {
+  export interface Dayjs {
+    addDays(days: number): Time;
+  }
+}
+dayjs.extend((_options, dayjsClass, _dayjsFactory) => {
+  dayjsClass.prototype.addDays = function (days: number): Time {
+    return dayjs.max(this.add(days, "day"), this.add(days * 24, "hour"));
+  };
+});
+
+export function format(t: Time): string {
+  return t.format("YYYY/MM/DD HH:mm:ss");
 }

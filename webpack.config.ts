@@ -1,5 +1,6 @@
 import path from "path";
 import webpack from "webpack";
+import gas from "gas-webpack-plugin";
 
 const config: webpack.Configuration = {
   mode: "production",
@@ -20,6 +21,7 @@ const config: webpack.Configuration = {
   resolve: {
     extensions: [".ts", ".js"],
   },
+  plugins: [new gas()],
 };
 
 export default config;
