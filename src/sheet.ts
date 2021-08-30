@@ -78,7 +78,8 @@ export function ensure(): GoogleAppsScript.Spreadsheet.Sheet {
 
 // init guarantees that the sheet exists and is initialized
 export function init(): void {
-  ensure();
+  const ds = ensure();
+  console.log("Data Sheet URL: %s", ds.getParent().getUrl());
 }
 
 export type Entry = {

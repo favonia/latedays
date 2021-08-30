@@ -51,7 +51,12 @@ export function ensure(): GoogleAppsScript.Forms.Form {
 
   const form = FormApp.create(config.formName);
 
-  form.setDescription(config.formDescription).setCollectEmail(true);
+  form
+    .setRequireLogin(true)
+    .setCollectEmail(true)
+    .setShowLinkToRespondAgain(true)
+    .setDescription(config.formDescription);
+
   addQuestion(form, config.actionQuestion);
   addQuestion(form, config.selectionQuestion);
 
@@ -69,5 +74,6 @@ export function ensure(): GoogleAppsScript.Forms.Form {
 }
 
 export function init(): void {
-  ensure();
+  const form = ensure();
+  console.log("Form URL: %s", form.getPublishedUrl());
 }
