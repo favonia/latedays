@@ -1,15 +1,7 @@
 import config from "../config/config";
-import { Action, Question, Assignment } from "../config/config";
 import * as time from "./time";
 import * as sheet from "./sheet";
-
-type Request = {
-  id: string;
-  email: string;
-  assignment: Assignment;
-  action: Action;
-  time: time.Time;
-};
+import * as form from "./form";
 
 type Response = {
   review?: boolean;
@@ -46,36 +38,7 @@ function formatSummary(entry: sheet.Entry): string[] {
       ];
 }
 
-/**
- * @remarks This function assumes institutional emails follow the common pattern
- * where usernames are not quoted and do not contain unusual characters such as "@".
- */
-function idOfEmail(email: string): string {
-  return email.match(/^([^@]*)@/)![1];
-}
-
-function extractQuetionResponse<T>(
-  q: Question<T>,
-  rs: GoogleAppsScript.Forms.ItemResponse[]
-): T {
-  const response: string = rs
-    .find((ir) => ir.getItem().getTitle() === q.title)!
-    .getResponse() as string;
-  return q.choices.find(([choice, _]) => choice === response)![1];
-}
-
-function parseFormSubmission(r: GoogleAppsScript.Forms.FormResponse): Request {
-  const rs = r.getItemResponses();
-  return {
-    id: idOfEmail(r.getRespondentEmail()),
-    email: r.getRespondentEmail(),
-    action: extractQuetionResponse(config.form.questions.action, rs),
-    assignment: extractQuetionResponse(config.form.questions.assignment, rs),
-    time: time.newTime(r.getTimestamp().toISOString()),
-  };
-}
-
-function updateAndRespond(entry: sheet.Entry, request: Request): Response {
+function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
   const assignment = request.assignment;
   const deadline = time.newTime(config.assignments[assignment].deadline);
 
@@ -222,7 +185,7 @@ function updateAndRespond(entry: sheet.Entry, request: Request): Response {
   }
 }
 
-function sendEmail(req: Request, res: Response, footer: string[]): void {
+function sendEmail(req: form.Request, res: Response, footer: string[]): void {
   const subject = config.email.subjectPrefix
     ? `${config.email.subjectPrefix} ${res.subject}`
     : res.subject;
@@ -251,7 +214,7 @@ function sendEmail(req: Request, res: Response, footer: string[]): void {
  ** TODO: Auto-update the deadline on Canvas
  **/
 export function handle(event: GoogleAppsScript.Events.FormsOnFormSubmit): void {
-  const request = parseFormSubmission(event.response);
+  const request = form.parseRequest(event.response);
 
   const lock = LockService.getScriptLock();
   lock.waitLock(30000);
