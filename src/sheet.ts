@@ -105,9 +105,9 @@ export function readRecord(
   if (rowIndex === -1) {
     row = headers.map((_, i) => (i === 0 ? id : 0));
     ds.appendRow(row);
-    rowIndex = values.length - 1; // "- 1" to remove the header
+    rowIndex = values.length;
   } else {
-    row = values[rowIndex + 1];
+    row = values[rowIndex];
   }
 
   // XXX O(n^2) for remapping
