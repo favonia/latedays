@@ -5,7 +5,7 @@ import copy from "copy-webpack-plugin";
 
 const config: webpack.Configuration = {
   mode: "production",
-  entry: "./src/index.ts",
+  entry: path.resolve(__dirname, "src", "index.ts"),
   output: {
     path: path.resolve(__dirname, "dist"),
     filename: "code.js",
@@ -22,7 +22,10 @@ const config: webpack.Configuration = {
   resolve: {
     extensions: [".ts", ".js"],
   },
-  plugins: [new gas(), new copy({ patterns: ["./src/appsscript.json"] })],
+  plugins: [
+    new gas(),
+    new copy({ patterns: [path.resolve(__dirname, "src", "appsscript.json")] }),
+  ],
 };
 
 export default config;
