@@ -1,0 +1,22 @@
+= 🏃 Late Days
+
+Management of late day requests using Google Forms and Google Sheets
+
+== ⚙️ Setting Up
+
+. Create the configuration file `config/config.ts` from the sample `config/sample.ts`.
+. Run the following commands:
++
+[source,bash]
+----
+npm run build
+npm run clasp login # if not globally logged in
+npm run clasp create
+npm run push
+----
+. Run `npm run clasp open` to open the on-line script editor in the browser.
+. Execute the top-level `init` function in the script editor.
+
+== ©️ Copyright
+
+Copyright 2020–2021 Kerno Development Team

@@ -1,4 +1,5 @@
-import * as config from "../config/config";
+import config from "../config/config";
+import { Question } from "../config/configTypes";
 
 const propFormId = "FORM_ID";
 
@@ -14,13 +15,13 @@ function createDeadlineTriggers(): void {
 
 function addQuestion<T>(
   form: GoogleAppsScript.Forms.Form,
-  q: config.Question<T>
+  q: Question<T>
 ): void {
   const item = form.addMultipleChoiceItem();
   item
     .setTitle(q.title)
     .setRequired(true)
-    .setChoices(Object.keys(q.choices).map((text) => item.createChoice(text)));
+    .setChoices(q.choices.map(([text, _]) => item.createChoice(text)));
 }
 
 export function reset(): void {
@@ -49,11 +50,19 @@ export function ensure(): GoogleAppsScript.Forms.Form {
     } catch (_) {}
   }
 
-  const form = FormApp.create(config.formName);
+  const form = FormApp.create(config.form.name);
 
-  form.setDescription(config.formDescription).setCollectEmail(true);
-  addQuestion(form, config.actionQuestion);
-  addQuestion(form, config.selectionQuestion);
+  form
+    .setRequireLogin(true)
+    .setCollectEmail(true)
+    .setShowLinkToRespondAgain(true);
+
+  if (config.form.description !== undefined) {
+    form.setDescription(config.form.description);
+  }
+
+  addQuestion(form, config.form.questions.action);
+  addQuestion(form, config.form.questions.assignment);
 
   // set up trigger on submission
   ScriptApp.newTrigger(callbackNameOnFormSubmit)
@@ -69,5 +78,6 @@ export function ensure(): GoogleAppsScript.Forms.Form {
 }
 
 export function init(): void {
-  ensure();
+  const form = ensure();
+  console.log("Form URL: %s", form.getPublishedUrl());
 }

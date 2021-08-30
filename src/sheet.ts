@@ -1,4 +1,4 @@
-import * as config from "../config/config";
+import config from "../config/config";
 import * as form from "./form";
 
 const propDataSheetId = "SHEET_ID";
@@ -7,23 +7,18 @@ const idHeader = "ID";
 
 let cachedSheet: GoogleAppsScript.Spreadsheet.Sheet | null = null;
 
-function usedHeader(title: string): string {
-  return `Used ${title}`;
-}
-
-function freeHeader(title: string): string {
-  return `Free ${title}`;
-}
+const usedHeader = (title: string): string => `Used ${title}`;
+const freeHeader = (title: string): string => `Free ${title}`;
 
 function initDataSheet(
   ds: GoogleAppsScript.Spreadsheet.Sheet
 ): GoogleAppsScript.Spreadsheet.Sheet {
   try {
-    ds.setName(config.dataSheetName);
+    ds.setName(config.sheet.dataSheetName);
   } catch (_) {}
 
   const headers = [idHeader];
-  Object.keys(config.deadlines).forEach((assign) => {
+  Object.keys(config.assignments).forEach((assign) => {
     headers.push(usedHeader(assign));
     headers.push(freeHeader(assign));
   });
@@ -49,7 +44,7 @@ export function ensure(): GoogleAppsScript.Spreadsheet.Sheet {
   try {
     ss = SpreadsheetApp.openById(f.getDestinationId());
   } catch (_) {
-    ss = SpreadsheetApp.create(config.spreadsheetName);
+    ss = SpreadsheetApp.create(config.sheet.spreadsheetName);
     // set the timezone
     ss.setSpreadsheetTimeZone(config.timezone);
     // link the form
@@ -78,7 +73,8 @@ export function ensure(): GoogleAppsScript.Spreadsheet.Sheet {
 
 // init guarantees that the sheet exists and is initialized
 export function init(): void {
-  ensure();
+  const ds = ensure();
+  console.log("Data Sheet URL: %s", ds.getParent().getUrl());
 }
 
 export type Entry = {
@@ -116,7 +112,7 @@ export function readRecord(
 
   // XXX O(n^2) for remapping
   const entry: Entry = { rowIndex: rowIndex, days: {} };
-  Object.keys(config.deadlines).forEach(function (assign) {
+  Object.keys(config.assignments).forEach(function (assign) {
     entry.days[assign] = {
       used: Number(
         row[headers.findIndex((v) => String(v) === usedHeader(assign))]

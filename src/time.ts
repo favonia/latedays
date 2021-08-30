@@ -1,4 +1,4 @@
-import * as config from "../config/config";
+import config from "../config/config";
 
 import dayjs from "dayjs";
 import minMax from "dayjs/plugin/minMax";
