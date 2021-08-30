@@ -9,6 +9,7 @@ Management of late day requests using Google Forms and Google Sheets
 +
 [source,bash]
 ----
+npm ci
 npm run build
 npm run clasp login # if not globally logged in
 npm run clasp create
