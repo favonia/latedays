@@ -32,7 +32,7 @@ export function regenerateForm(): void {
   form.regenerate();
 }
 // @ts-ignore: global
-global.reset = withLock(regenerateForm);
+global.regenerateForm = withLock(regenerateForm);
 
 // @ts-ignore: global
 global.callbackOnFormSubmit = withLock(response.handle);
