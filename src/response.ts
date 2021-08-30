@@ -216,17 +216,11 @@ function sendEmail(req: form.Request, res: Response, footer: string[]): void {
 export function handle(event: GoogleAppsScript.Events.FormsOnFormSubmit): void {
   const request = form.parseRequest(event.response);
 
-  const lock = LockService.getScriptLock();
-  lock.waitLock(30000);
-  try {
-    const ds = sheet.ensure();
-    const entry = sheet.readRecord(ds, request.id);
-    const response = updateAndRespond(entry, request);
-    sheet.updateRecord(ds, entry);
+  const ds = sheet.ensure();
+  const entry = sheet.readRecord(ds, request.id);
+  const response = updateAndRespond(entry, request);
+  sheet.updateRecord(ds, entry);
 
-    const usageSummary = formatSummary(entry);
-    sendEmail(request, response, usageSummary);
-  } finally {
-    lock.releaseLock();
-  }
+  const usageSummary = formatSummary(entry);
+  sendEmail(request, response, usageSummary);
 }
