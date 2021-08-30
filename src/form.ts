@@ -1,5 +1,6 @@
 import config from "../config/config";
-import { Question } from "../config/configTypes";
+import { Action, Question, Assignment } from "../config/config";
+import * as time from "./time";
 
 const propFormId = "FORM_ID";
 
@@ -80,4 +81,41 @@ export function ensure(): GoogleAppsScript.Forms.Form {
 export function init(): void {
   const form = ensure();
   console.log("Form URL: %s", form.getPublishedUrl());
+}
+
+/**
+ * @remarks This function assumes institutional emails follow the common pattern
+ * where usernames are not quoted and do not contain unusual characters such as "@".
+ */
+function idOfEmail(email: string): string {
+  return email.match(/^([^@]*)@/)![1];
+}
+
+function extractQuetionResponse<T>(
+  q: Question<T>,
+  rs: GoogleAppsScript.Forms.ItemResponse[]
+): T {
+  const response: string = rs
+    .find((ir) => ir.getItem().getTitle() === q.title)!
+    .getResponse() as string;
+  return q.choices.find(([choice, _]) => choice === response)![1];
+}
+
+export type Request = {
+  id: string;
+  email: string;
+  assignment: Assignment;
+  action: Action;
+  time: time.Time;
+};
+
+export function parseRequest(r: GoogleAppsScript.Forms.FormResponse): Request {
+  const rs = r.getItemResponses();
+  return {
+    id: idOfEmail(r.getRespondentEmail()),
+    email: r.getRespondentEmail(),
+    action: extractQuetionResponse(config.form.questions.action, rs),
+    assignment: extractQuetionResponse(config.form.questions.assignment, rs),
+    time: time.newTime(r.getTimestamp().toISOString()),
+  };
 }
