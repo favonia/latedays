@@ -1,7 +1,7 @@
 {
   "dependencies": {},
   "executionApi": {
-    "access": "ANYONE"
+    "access": "MYSELF"
   },
   "exceptionLogging": "STACKDRIVER",
   "oauthScopes": [
