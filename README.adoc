@@ -30,7 +30,7 @@ npm run deploy
 
 === ♻️ Form Regenaration
 
-If configuration is changed, there are extra steps _after_ updating the code.
+If configuration is changed, there are extra steps _after_ updating the code to update the form.
 
 . Run `npm run clasp open` to open the on-line script editor in the browser.
 . Execute the top-level `regenerateForm` function in the script editor to regenerate the form.

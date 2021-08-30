@@ -38,7 +38,10 @@ export function reset(): void {
 }
 
 function setupForm(form: GoogleAppsScript.Forms.Form): void {
+  form.getItems().forEach((item) => form.deleteItem(item));
+
   form
+    .setTitle(config.form.title)
     .setRequireLogin(true)
     .setCollectEmail(true)
     .setShowLinkToRespondAgain(true);
@@ -65,7 +68,7 @@ export function ensure(): GoogleAppsScript.Forms.Form {
     } catch (_) {}
   }
 
-  const form = FormApp.create(config.form.name);
+  const form = FormApp.create(config.form.title);
   setupForm(form);
 
   // set up trigger on submission
@@ -82,9 +85,7 @@ export function ensure(): GoogleAppsScript.Forms.Form {
 }
 
 export function regenerate(): void {
-  const form = ensure();
-  form.getItems().forEach((item) => form.deleteItem(item));
-  setupForm(form);
+  setupForm(ensure());
 }
 
 export function init(): void {
