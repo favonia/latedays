@@ -41,7 +41,7 @@ function ensureHeaders(ds: GoogleAppsScript.Spreadsheet.Sheet): ParsedHeaders {
     }
   });
 
-  ds.getRange(1, 1, 1, headers.length).setValues(headers);
+  ds.getRange(1, 1, 1, headers.length).setValues([headers]);
 
   return (cachedParsedHeaders = lookup);
 }
