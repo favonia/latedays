@@ -18,6 +18,23 @@ npm run deploy
 . Run `npm run clasp open` to open the on-line script editor in the browser.
 . Execute the top-level `init` function in the script editor.
 
+== ⬆️ Code Re-deployment
+
+. Run the following commands after updating the code:
++
+[source,bash]
+----
+npm run build
+npm run deploy
+----
+
+=== ♻️ Form Regenaration
+
+If configuration is changed, there are extra steps _after_ updating the code.
+
+. Run `npm run clasp open` to open the on-line script editor in the browser.
+. Execute the top-level `regenerateForm` function in the script editor to regenerate the form.
+
 == ©️ Copyright
 
 Copyright 2020–2021 Kerno Development Team

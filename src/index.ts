@@ -14,19 +14,25 @@ function withLock(f: (...args: any[]) => void): (...args: any[]) => void {
   };
 }
 
-export function init() {
+export function init(): void {
   form.init();
   sheet.init();
 }
 // @ts-ignore: global
 global.init = withLock(init);
 
-export function reset() {
+export function reset(): void {
   form.reset();
   sheet.reset();
 }
 // @ts-ignore: global
 global.reset = withLock(reset);
+
+export function regenerateForm(): void {
+  form.regenerate();
+}
+// @ts-ignore: global
+global.reset = withLock(regenerateForm);
 
 // @ts-ignore: global
 global.callbackOnFormSubmit = withLock(response.handle);

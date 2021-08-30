@@ -37,6 +37,20 @@ export function reset(): void {
   }
 }
 
+function setupForm(form: GoogleAppsScript.Forms.Form): void {
+  form
+    .setRequireLogin(true)
+    .setCollectEmail(true)
+    .setShowLinkToRespondAgain(true);
+
+  if (config.form.description !== undefined) {
+    form.setDescription(config.form.description);
+  }
+
+  addQuestion(form, config.form.questions.action);
+  addQuestion(form, config.form.questions.assignment);
+}
+
 export function ensure(): GoogleAppsScript.Forms.Form {
   if (cachedForm !== null) {
     return cachedForm;
@@ -52,18 +66,7 @@ export function ensure(): GoogleAppsScript.Forms.Form {
   }
 
   const form = FormApp.create(config.form.name);
-
-  form
-    .setRequireLogin(true)
-    .setCollectEmail(true)
-    .setShowLinkToRespondAgain(true);
-
-  if (config.form.description !== undefined) {
-    form.setDescription(config.form.description);
-  }
-
-  addQuestion(form, config.form.questions.action);
-  addQuestion(form, config.form.questions.assignment);
+  setupForm(form);
 
   // set up trigger on submission
   ScriptApp.newTrigger(callbackNameOnFormSubmit)
@@ -76,6 +79,12 @@ export function ensure(): GoogleAppsScript.Forms.Form {
 
   props.setProperty(propFormId, form.getId());
   return (cachedForm = form);
+}
+
+export function regenerate(): void {
+  const form = ensure();
+  form.getItems().forEach((item) => form.deleteItem(item));
+  setupForm(form);
 }
 
 export function init(): void {
