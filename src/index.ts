@@ -2,31 +2,31 @@ import * as form from "./form";
 import * as sheet from "./sheet";
 import * as response from "./response";
 
+function withLock(f: (...args: any[]) => void): (...args: any[]) => void {
+  return (...args: any[]) => {
+    const lock = LockService.getScriptLock();
+    lock.waitLock(30000);
+    try {
+      f(...args);
+    } finally {
+      lock.releaseLock();
+    }
+  };
+}
+
 export function init() {
-  const lock = LockService.getScriptLock();
-  lock.waitLock(30000);
-  try {
-    form.init();
-    sheet.init();
-  } finally {
-    lock.releaseLock();
-  }
+  form.init();
+  sheet.init();
 }
 // @ts-ignore: global
-global.init = init;
+global.init = withLock(init);
 
 export function reset() {
-  const lock = LockService.getScriptLock();
-  lock.waitLock(30000);
-  try {
-    form.reset();
-    sheet.reset();
-  } finally {
-    lock.releaseLock();
-  }
+  form.reset();
+  sheet.reset();
 }
 // @ts-ignore: global
-global.reset = reset;
+global.reset = withLock(reset);
 
 // @ts-ignore: global
-global.callbackOnFormSubmit = response.handle;
+global.callbackOnFormSubmit = withLock(response.handle);
