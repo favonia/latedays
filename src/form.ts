@@ -85,7 +85,9 @@ export function ensure(): GoogleAppsScript.Forms.Form {
 }
 
 export function regenerate(): void {
-  setupForm(ensure());
+  const form = ensure();
+  setupForm(form);
+  console.log("Form URL: %s", form.getPublishedUrl());
 }
 
 export function init(): void {
