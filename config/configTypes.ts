@@ -28,7 +28,7 @@ export type Question<T> = {
 };
 
 export interface FormSettings<Assignment> {
-  readonly name: string;
+  readonly title: string;
   readonly description?: string;
   readonly questions: {
     readonly action: Question<Action>;
