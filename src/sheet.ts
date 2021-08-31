@@ -9,10 +9,6 @@ const idHeader = "ID";
 const usedHeader = (title: string): string => `Used ${title}`;
 const freeHeader = (title: string): string => `Free ${title}`;
 
-type ParsedHeaders = Record<string, number>;
-
-let cachedParsedHeaders: ParsedHeaders | null = null;
-
 const expectedHeaders = [
   idHeader,
   ...Object.keys(config.assignments).flatMap((assign) => [
@@ -21,9 +17,13 @@ const expectedHeaders = [
   ]),
 ];
 
-function ensureHeaders(ds: GoogleAppsScript.Spreadsheet.Sheet): ParsedHeaders {
-  if (cachedParsedHeaders !== null) {
-    return cachedParsedHeaders;
+// reverse lookup table
+type IndexOfHeader = Record<string, number>;
+let cachedIndexOfHeader: IndexOfHeader | null = null;
+
+function ensureHeaders(ds: GoogleAppsScript.Spreadsheet.Sheet): IndexOfHeader {
+  if (cachedIndexOfHeader !== null) {
+    return cachedIndexOfHeader;
   }
 
   let lookup: Record<string, number> = {};
@@ -31,7 +31,7 @@ function ensureHeaders(ds: GoogleAppsScript.Spreadsheet.Sheet): ParsedHeaders {
   try {
     headers = ds.getRange(1, 1, 1, ds.getLastColumn()).getValues()[0];
     headers.forEach((value, index) => (lookup[String(value)] ??= index));
-  } catch (_) {}
+  } catch {}
 
   // add all missing headers
   expectedHeaders.forEach(function (item: string): void {
@@ -43,7 +43,7 @@ function ensureHeaders(ds: GoogleAppsScript.Spreadsheet.Sheet): ParsedHeaders {
 
   ds.getRange(1, 1, 1, headers.length).setValues([headers]);
 
-  return (cachedParsedHeaders = lookup);
+  return (cachedIndexOfHeader = lookup);
 }
 
 function initDataSheet(
@@ -55,7 +55,10 @@ function initDataSheet(
     ds.setName(config.sheet.dataSheetName);
   } catch {}
 
-  ensureHeaders(ds);
+  const headers = ensureHeaders(ds);
+
+  ds.setFrozenRows(1);
+  ds.setFrozenColumns(headers[idHeader] + 1);
 
   return ds;
 }
