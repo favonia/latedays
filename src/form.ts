@@ -1,8 +1,11 @@
 import config from "../config/config";
 import { Action, Question, Assignment } from "../config/config";
 import * as time from "./time";
+import * as props from "./props";
 
 const propFormId = "FORM_ID";
+const propActionItemId = "ACTION_ITEM_ID";
+const propAssignmentItemId = "ASSIGNMENT_ITEM_ID";
 
 let cachedForm: GoogleAppsScript.Forms.Form | null = null;
 
@@ -14,32 +17,39 @@ function createDeadlineTriggers(): void {
   // TODO
 }
 
-function addQuestion<T>(
+function ensureFormItem(
   form: GoogleAppsScript.Forms.Form,
+  propName: string
+): GoogleAppsScript.Forms.MultipleChoiceItem {
+  const itemId = props.get(propName);
+  if (itemId !== null) {
+    // this try/catch is for asMultipleChoiceItem and perhaps getItemById
+    try {
+      const item = form.getItemById(Number(itemId));
+      if (item !== undefined) {
+        return item.asMultipleChoiceItem();
+      }
+    } catch {}
+  }
+  const item = form.addMultipleChoiceItem();
+  props.set(propName, String(item.getId()));
+  return item;
+}
+
+function ensureQuestion<T>(
+  form: GoogleAppsScript.Forms.Form,
+  propName: string,
   q: Question<T>
 ): void {
-  const item = form.addMultipleChoiceItem();
+  const item = ensureFormItem(form, propName);
+
   item
     .setTitle(q.title)
     .setRequired(true)
     .setChoices(q.choices.map(([text, _]) => item.createChoice(text)));
 }
 
-export function reset(): void {
-  const props = PropertiesService.getScriptProperties();
-  const id = props.getProperty(propFormId);
-  if (id !== null) {
-    const form = FormApp.openById(id);
-    ScriptApp.getUserTriggers(form).forEach((trigger) =>
-      ScriptApp.deleteTrigger(trigger)
-    );
-    props.deleteProperty(propFormId);
-  }
-}
-
 function setupForm(form: GoogleAppsScript.Forms.Form): void {
-  form.getItems().forEach((item) => form.deleteItem(item));
-
   form
     .setTitle(config.form.title)
     .setRequireLogin(true)
@@ -50,8 +60,8 @@ function setupForm(form: GoogleAppsScript.Forms.Form): void {
     form.setDescription(config.form.description);
   }
 
-  addQuestion(form, config.form.questions.action);
-  addQuestion(form, config.form.questions.assignment);
+  ensureQuestion(form, propActionItemId, config.form.questions.action);
+  ensureQuestion(form, propAssignmentItemId, config.form.questions.assignment);
 }
 
 export function ensure(): GoogleAppsScript.Forms.Form {
@@ -59,10 +69,9 @@ export function ensure(): GoogleAppsScript.Forms.Form {
     return cachedForm;
   }
 
-  const props = PropertiesService.getScriptProperties();
-
-  const id = props.getProperty(propFormId);
+  const id = props.get(propFormId);
   if (id != null) {
+    // this try/catch is for openById
     try {
       return (cachedForm = FormApp.openById(id));
     } catch {}
@@ -80,8 +89,21 @@ export function ensure(): GoogleAppsScript.Forms.Form {
   // create triggers to update the form
   createDeadlineTriggers();
 
-  props.setProperty(propFormId, form.getId());
+  props.set(propFormId, form.getId());
   return (cachedForm = form);
+}
+
+export function reset(): void {
+  const id = props.get(propFormId);
+  if (id !== null) {
+    const form = FormApp.openById(id);
+    ScriptApp.getUserTriggers(form).forEach((trigger) =>
+      ScriptApp.deleteTrigger(trigger)
+    );
+    props.del(propFormId);
+    props.del(propActionItemId);
+    props.del(propAssignmentItemId);
+  }
 }
 
 export function regenerate(): void {

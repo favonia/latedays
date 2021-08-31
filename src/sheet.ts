@@ -1,5 +1,6 @@
 import config from "../config/config";
 import * as form from "./form";
+import * as props from "./props";
 
 const propDataSheetId = "SHEET_ID";
 
@@ -64,7 +65,7 @@ function initDataSheet(
 }
 
 export function reset(): void {
-  PropertiesService.getScriptProperties().deleteProperty(propDataSheetId);
+  props.del(propDataSheetId);
 }
 
 export function ensure(): GoogleAppsScript.Spreadsheet.Sheet {
@@ -72,10 +73,9 @@ export function ensure(): GoogleAppsScript.Spreadsheet.Sheet {
     return cachedSheet;
   }
 
-  const props = PropertiesService.getScriptProperties();
   const f = form.ensure();
 
-  let dsId: number | null = Number(props.getProperty(propDataSheetId));
+  let dsId: string | null = props.get(propDataSheetId);
 
   let ss: GoogleAppsScript.Spreadsheet.Spreadsheet;
   try {
@@ -95,7 +95,8 @@ export function ensure(): GoogleAppsScript.Spreadsheet.Sheet {
     ds = ss.getSheets()[0];
     initDataSheet(ds);
   } else {
-    ds = ss.getSheets().find((sheet) => sheet.getSheetId() === dsId);
+    // for whatever reasons, there's no "getSheetById"
+    ds = ss.getSheets().find((sheet) => sheet.getSheetId() === Number(dsId));
     if (ds === undefined) {
       ds = ss.insertSheet();
       initDataSheet(ds);
@@ -104,7 +105,7 @@ export function ensure(): GoogleAppsScript.Spreadsheet.Sheet {
     }
   }
 
-  props.setProperty(propDataSheetId, ds.getSheetId().toString());
+  props.set(propDataSheetId, ds.getSheetId().toString());
   return (cachedSheet = ds);
 }
 
