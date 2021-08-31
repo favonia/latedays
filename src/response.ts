@@ -14,7 +14,7 @@ function formatSummary(entry: sheet.Entry): string[] {
   Object.entries(entry.days).forEach(([assign, days]) => {
     if (days.used + days.free > 0) {
       latedays.push(
-        `${assign}: ${days.used + days.free}` +
+        `- ${assign}: ${days.used + days.free} day(s)` +
           (days.free > 0 ? ` (including ${days.free} free late day(s))` : "")
       );
     }
