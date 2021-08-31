@@ -65,7 +65,7 @@ export function ensure(): GoogleAppsScript.Forms.Form {
   if (id != null) {
     try {
       return (cachedForm = FormApp.openById(id));
-    } catch (_) {}
+    } catch {}
   }
 
   const form = FormApp.create(config.form.title);

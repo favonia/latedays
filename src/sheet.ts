@@ -31,7 +31,7 @@ function ensureHeaders(ds: GoogleAppsScript.Spreadsheet.Sheet): IndexOfHeader {
   try {
     headers = ds.getRange(1, 1, 1, ds.getLastColumn()).getValues()[0];
     headers.forEach((value, index) => (lookup[String(value)] ??= index));
-  } catch (_) {}
+  } catch {}
 
   // add all missing headers
   expectedHeaders.forEach(function (item: string): void {
