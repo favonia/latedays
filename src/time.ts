@@ -3,8 +3,10 @@ import config from "../config/config";
 import dayjs from "dayjs";
 import minMax from "dayjs/plugin/minMax";
 import timezone from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
 dayjs.extend(minMax);
 dayjs.extend(timezone);
+dayjs.extend(utc);
 
 dayjs.tz.setDefault(config.timezone);
 

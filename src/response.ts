@@ -107,8 +107,11 @@ function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
           };
 
         default: {
-          const newDeadline = addDays(newDeadlineWithoutFreeDays, free);
           entry.days[assignment].used = Math.max(0, used - request.action.days);
+          const newDeadline = addDays(
+            deadline,
+            Math.max(0, used - request.action.days) + free
+          );
           return {
             subject: `Late day request for ${assignment} approved: new deadline ${formatTime(
               newDeadline
@@ -163,8 +166,8 @@ function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
           };
 
         default: {
-          const newDeadline = addDays(deadline, request.action.days + free);
           entry.days[assignment].used = request.action.days;
+          const newDeadline = addDays(deadline, request.action.days + free);
           return {
             subject: `Late day request for ${assignment} approved: new deadline ${formatTime(
               newDeadline
