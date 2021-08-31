@@ -23,6 +23,7 @@ function ensureFormItem(
 ): GoogleAppsScript.Forms.MultipleChoiceItem {
   const itemId = props.get(propName);
   if (itemId !== null) {
+    // this try/catch is for asMultipleChoiceItem and perhaps getItemById
     try {
       const item = form.getItemById(Number(itemId));
       if (item !== undefined) {
@@ -70,6 +71,7 @@ export function ensure(): GoogleAppsScript.Forms.Form {
 
   const id = props.get(propFormId);
   if (id != null) {
+    // this try/catch is for openById
     try {
       return (cachedForm = FormApp.openById(id));
     } catch {}
