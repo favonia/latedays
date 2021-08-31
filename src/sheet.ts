@@ -55,7 +55,10 @@ function initDataSheet(
     ds.setName(config.sheet.dataSheetName);
   } catch {}
 
-  ensureHeaders(ds);
+  const headers = ensureHeaders(ds);
+
+  ds.setFrozenRows(1);
+  ds.setFrozenColumns(headers[idHeader] + 1);
 
   return ds;
 }
