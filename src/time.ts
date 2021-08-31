@@ -3,8 +3,10 @@ import config from "../config/config";
 import dayjs from "dayjs";
 import minMax from "dayjs/plugin/minMax";
 import timezone from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
 dayjs.extend(minMax);
 dayjs.extend(timezone);
+dayjs.extend(utc);
 
 dayjs.tz.setDefault(config.timezone);
 
@@ -24,17 +26,10 @@ export function newTime(date?: string | Date | Time): Time {
  *
  * @param days - the number of applied late days.
  */
-declare module "dayjs" {
-  export interface Dayjs {
-    addDays(days: number): Time;
-  }
+export function addDays(original: Time, days: number): Time {
+  return dayjs.max(original.add(days, "day"), original.add(days * 24, "hour"));
 }
-dayjs.extend((_options, dayjsClass, _dayjsFactory) => {
-  dayjsClass.prototype.addDays = function (days: number): Time {
-    return dayjs.max(this.add(days, "day"), this.add(days * 24, "hour"));
-  };
-});
 
 export function format(t: Time): string {
-  return t.format("YYYY/MM/DD HH:mm:ss");
+  return t.tz(config.timezone).format("YYYY/MM/DD HH:mm:ss");
 }
