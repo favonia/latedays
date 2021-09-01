@@ -102,7 +102,7 @@ function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
             body: [
               `You requested a refund of ${request.action.days} late day(s).`,
               `It will take some time for us to review your refund request.`,
-              `Reply to this email if nothing happens in a week.`,
+              `Reply-all (not just reply) to this email if nothing happens in a week.`,
             ],
           };
 
@@ -193,23 +193,25 @@ function sendEmail(req: form.Request, res: Response, footer: string[]): void {
   const subject = config.email.subjectPrefix
     ? `${config.email.subjectPrefix} ${res.subject}`
     : res.subject;
-  const body = (res.body.length > 0 ? [...res.body, , ...footer] : footer).join(
-    "\n"
-  );
 
-  MailApp.sendEmail(
-    req.email,
-    subject,
-    body,
-    res.review
-      ? {
-          cc: config.email.courseEmail,
-          replyTo: req.email,
-        }
-      : {
-          replyTo: config.email.courseEmail,
-        }
-  );
+  const body = (
+    res.body.length && footer.length ? [...res.body, , ...footer] : footer
+  ).join("\n");
+
+  const cc = res.review ? config.email.courseEmail : undefined;
+
+  // XXX Ideally, when `res.review` is true, "Reply-To" should be `[req.email, config.email.courseEmail].join(",")`,
+  // containing both email addresses. This is allowed by RFC, but unfortunately NOT supported by Gmail. Thus,
+  // the more useful one `req.email` is used instead.
+  const replyTo = res.review ? req.email : config.email.courseEmail;
+
+  MailApp.sendEmail({
+    to: req.email,
+    subject: subject,
+    body: body,
+    cc: cc,
+    replyTo: replyTo,
+  });
 }
 
 /** Validate the student form submission, writes appropriate data into
