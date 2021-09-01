@@ -1,3 +1,5 @@
+/** @see `sample.ts` for documentation. */
+
 import type { Dayjs } from "dayjs";
 
 export interface ActionRefund {

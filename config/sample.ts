@@ -29,7 +29,7 @@ export const config: Config<Assignment> = {
     // Title of the form.
     title: "Late Days Request (My Course, 2999 Spring)",
     // Description on the form.
-    description: `You have 10 late days in total. For each assignment, you can use at most 2 late days. After submitting the form, you will receive an email showing the result of your request. If your request is approved, we will adjust the due dates on Canvas accordingly.`,
+    description: "You have 10 late days in total. For each assignment, you can use at most 2 late days. After submitting the form, you will receive an email showing the result of your request. If your request is approved, we will adjust the due dates on Canvas accordingly.",
     questions: {
       action: {
         title: "What do you want to do?",
