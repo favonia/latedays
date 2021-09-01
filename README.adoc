@@ -12,7 +12,7 @@ Management of late day requests using Google Forms and Google Sheets
 npm ci
 npm run build
 npm run clasp login # if not globally logged in
-npm run clasp create
+npm run clasp create -- --type standalone
 npm run deploy
 ----
 . Run `npm run clasp open` to open the on-line script editor in the browser.
