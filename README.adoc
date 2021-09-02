@@ -12,7 +12,7 @@ Management of late day requests using Google Forms and Google Sheets
 npm ci
 npm run build
 npm run clasp login # if not globally logged in
-npm run clasp create
+npm run clasp create -- --type standalone --title "Late Days Script"
 npm run deploy
 ----
 . Run `npm run clasp open` to open the on-line script editor in the browser.
@@ -30,10 +30,14 @@ npm run deploy
 
 === ♻️ Form Regenaration
 
-If configuration is changed, there are extra steps _after_ updating the code to update the form.
+If the configuration is changed, you should also regenerate the form _after_ updating the code:
 
 . Run `npm run clasp open` to open the on-line script editor in the browser.
 . Execute the top-level `regenerateForm` function in the script editor to regenerate the form.
+
+== 🧘 Advanced Setup
+
+It is possible to avoid `npm run clasp open` and execute top-level functions directly from the command line, but a much more advanced setup is needed. Carefully follow https://github.com/google/clasp/blob/master/docs/run.md[clasp`' documentation on `clasp run`] to enable this feature. (Caveat: it seems `executionApi.access` in `application.json` can remain to be `MYSELF` unless you want others to run the script; in other words, you do not have to modify `application.json` at all.)
 
 == ©️ Copyright
 

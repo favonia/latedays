@@ -118,8 +118,18 @@ export function init(): void {
 }
 
 /**
- * @remarks This function assumes institutional emails follow the common pattern
- * where usernames are not quoted and do not contain unusual characters such as "@".
+ * `idOfEmail` extracts usernames from institutional email addresses.
+ *
+ * @remarks We do not use emails as IDs because, in the University of Minnesota,
+ * some students might be changing their campus domains _while_ taking courses.
+ * (For example, an email address at the Twin Cities campus ends with "@umn.edu"
+ * and the corresponding one at the Duluth campus ends with "@d.umn.edu". A student
+ * transferring from one campus to another could use a different address.)
+ * The solution is to extract the username to correctly identify students.
+ *
+ * @remarks This function assumes institutional usernames are not quoted
+ * and do not contain unusual characters such as "@". (RFCs allowed many
+ * more email addresses that could not be handled by this function.)
  */
 function idOfEmail(email: string): string {
   return email.match(/^([^@]*)@/)![1];
