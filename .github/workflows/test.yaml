@@ -18,3 +18,4 @@ jobs:
           npm ci
           cp config/sample.ts config/config.ts
           npm run build
+          npm test
