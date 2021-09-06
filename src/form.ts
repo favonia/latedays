@@ -160,6 +160,6 @@ export function parseRequest(r: GoogleAppsScript.Forms.FormResponse): Request {
     email: r.getRespondentEmail(),
     action: extractQuetionResponse(config.form.questions.action, rs),
     assignment: extractQuetionResponse(config.form.questions.assignment, rs),
-    time: time.newTime(r.getTimestamp().toISOString()),
+    time: time.fromISO(r.getTimestamp().toISOString()),
   };
 }
