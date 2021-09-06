@@ -4,7 +4,7 @@
   "description": "Management of late day requests using Google Forms and Google Sheets",
   "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "nyc ts-mocha test/**.ts",
     "build": "webpack",
     "clasp": "cd dist && clasp",
     "deploy": "cd dist && clasp push -f"
