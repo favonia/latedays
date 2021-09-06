@@ -1,5 +1,6 @@
 import * as form from "./form";
 import * as sheet from "./sheet";
+import * as time from "./time";
 import * as response from "./response";
 
 function withLock(f: (...args: any[]) => void): (...args: any[]) => void {

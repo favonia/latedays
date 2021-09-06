@@ -1,7 +1,5 @@
 /** @see `sample.ts` for documentation. */
 
-import type { Dayjs } from "dayjs";
-
 export interface ActionRefund {
   readonly act: "refund";
   readonly days: number;
@@ -18,7 +16,7 @@ export interface ActionSummary {
 
 export type Action = ActionRefund | ActionRequest | ActionSummary;
 
-export type AssignmentInfo = { deadline: string | Date | Dayjs };
+export type AssignmentInfo = { deadline: string };
 
 export type Assignments<Assignment extends string> = Readonly<
   Record<Assignment, AssignmentInfo>

@@ -1,5 +1,5 @@
 import config from "../config/config";
-import { newTime, addDays, format as formatTime } from "./time";
+import { fromISO as newTime, addDays, format as formatTime } from "./time";
 import * as sheet from "./sheet";
 import * as form from "./form";
 
@@ -70,9 +70,7 @@ function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
       );
 
       switch (true) {
-        case request.time.isAfter(
-          addDays(deadline, config.policy.refundPeriodInDays)
-        ):
+        case request.time > addDays(deadline, config.policy.refundPeriodInDays):
           return {
             subject: `Late day refund request for ${assignment} rejected`,
             body: [
@@ -95,7 +93,7 @@ function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
             ],
           };
 
-        case request.time.isAfter(newDeadlineWithoutFreeDays):
+        case request.time > newDeadlineWithoutFreeDays:
           return {
             review: true,
             subject: `Late day refund request for ${assignment} received`,
@@ -134,9 +132,8 @@ function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
 
     case "request": {
       switch (true) {
-        case request.time.isAfter(
-          addDays(deadline, config.policy.requestPeriodInDays)
-        ):
+        case request.time >
+          addDays(deadline, config.policy.requestPeriodInDays):
           return {
             subject: `Late day request rejected`,
             body: [

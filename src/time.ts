@@ -1,20 +1,11 @@
+import { DateTime } from "luxon";
 import config from "../config/config";
 
-import dayjs from "dayjs";
-import minMax from "dayjs/plugin/minMax";
-import timezone from "dayjs/plugin/timezone";
-import utc from "dayjs/plugin/utc";
-dayjs.extend(minMax);
-dayjs.extend(timezone);
-dayjs.extend(utc);
-
-dayjs.tz.setDefault(config.timezone);
-
 // The type of time across the scripts.
-export type Time = dayjs.Dayjs;
+export type Time = DateTime;
 
-export function newTime(date?: string | Date | Time): Time {
-  return dayjs(date);
+export function fromISO(date: string): Time {
+  return DateTime.fromISO(date).setZone(config.timezone);
 }
 
 /**
@@ -27,9 +18,15 @@ export function newTime(date?: string | Date | Time): Time {
  * @param days - the number of applied late days.
  */
 export function addDays(original: Time, days: number): Time {
-  return dayjs.max(original.add(days, "day"), original.add(days * 24, "hour"));
+  return DateTime.max(
+    original.plus({ hours: 24 * days }),
+    original.plus({ days: days })
+  );
 }
 
 export function format(t: Time): string {
-  return t.tz(config.timezone).format("YYYY/MM/DD HH:mm:ss");
+  return t
+    .setLocale("en")
+    .setZone(config.timezone)
+    .toLocaleString(DateTime.DATETIME_FULL_WITH_SECONDS);
 }
