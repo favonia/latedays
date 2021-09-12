@@ -1,5 +1,7 @@
 = 🏃 Late Days
 
+image::docs/form-demo.png[Google Form Demo]
+
 Management of late day requests using Google Forms and Google Sheets
 
 == ⚙️ Setting Up
