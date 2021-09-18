@@ -158,7 +158,7 @@ function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
           return {
             subject: `Late day request for ${assignment} rejected`,
             body: [
-              `You cannot request ${request.action} late day(s) for ${assignment}, because you only have ${remaining} late day(s) available.`,
+              `You cannot request ${request.action.days} late day(s) for ${assignment}, because you only have ${remaining} late day(s) available.`,
             ],
           };
 
@@ -170,7 +170,7 @@ function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
               newDeadline
             )}`,
             body: [
-              `This is a confirmation that you spent ${request.action} day(s) for ${assignment}.`,
+              `This is a confirmation that you spent ${request.action.days} day(s) for ${assignment}.`,
               ...freeDaysMessage,
               `The original deadline for ${assignment} is ${formatTime(
                 deadline
