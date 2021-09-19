@@ -11,13 +11,18 @@ Management of late day requests using Google Forms and Google Sheets
 +
 [source,bash]
 ----
+# install dependencies
 npm ci
+# build and minimize the JavaScript code
 npm run build
+# log into your Google account
 npm run clasp login # if not globally logged in
+# create a new Google Apps Script project
 npm run clasp create -- --type standalone --title "Late Days Script"
+# deploy the code to the newly created Google Apps Script project
 npm run deploy
 ----
-. Run `npm run clasp open` to open the on-line script editor in the browser, and execute the top-level function `init` within the opened script editor.
+. Run `npm run clasp open` to open the on-line script editor in the browser, and then execute the top-level function `init` within the opened script editor to initialize the form and the spreadsheet. The URLs will be printed in the execution log. (It is safe to run this function multiple times as it would not perform any action if the form and the spreadsheet have already been initialized.)
 
 == ⬆️ Code Re-deployment
 
@@ -33,7 +38,7 @@ npm run deploy
 
 If the configuration is changed, you should also regenerate the form _after_ updating the code:
 
-. Run `npm run clasp open` to open the on-line script editor in the browser, and execute the top-level function `regenerateForm` within the script editor to regenerate the form.
+. Run `npm run clasp open` to open the on-line script editor in the browser, and then execute the top-level function `regenerateForm` within the opened script editor to regenerate the form.
 
 == 🧘 Advanced Setup
 
