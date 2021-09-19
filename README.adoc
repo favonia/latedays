@@ -26,7 +26,7 @@ npm run clasp create -- --type standalone --title "Late Days Script"
 # deploy the code to the newly created Google Apps Script project
 npm run deploy
 ----
-. Run `npm run clasp open` to open the on-line script editor in the browser, and then execute the top-level function `init` within the opened script editor to initialize the form and the spreadsheet. The URLs will be printed in the execution log. (It is safe to run this function multiple times as it would not perform any action if the form and the spreadsheet have already been initialized.)
+. Run `npm run clasp open` to open the on-line script editor in the browser, and then execute the top-level function `init` within the opened script editor to genetare a new form and a new spreadsheet. The URLs of the form and the spreadsheet will be printed in the execution log. (It is safe to run this function multiple times as it would not perform any action if the form and the spreadsheet have already been generated.)
 
 == ⬆️ Code Re-deployment
 
