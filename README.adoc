@@ -13,12 +13,16 @@ Management of late day requests using Google Forms and Google Sheets
 ----
 # install dependencies
 npm ci
+
 # build the JavaScript code
 npm run build
+
 # log into your Google account (if not globally logged in yet)
 npm run clasp login
+
 # create a new Google Apps Script project
 npm run clasp create -- --type standalone --title "Late Days Script"
+
 # deploy the code to the newly created Google Apps Script project
 npm run deploy
 ----
