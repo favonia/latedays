@@ -6,8 +6,8 @@
   "scripts": {
     "test": "nyc ts-mocha test/**.ts",
     "build": "webpack",
-    "clasp": "cd dist && clasp",
-    "deploy": "cd dist && clasp push -f"
+    "clasp": "mkdir -p dist && cd dist && clasp",
+    "deploy": "mkdir -p dist && cd dist && clasp push -f"
   },
   "repository": {
     "type": "git",
