@@ -17,8 +17,7 @@ npm run clasp login # if not globally logged in
 npm run clasp create -- --type standalone --title "Late Days Script"
 npm run deploy
 ----
-. Run `npm run clasp open` to open the on-line script editor in the browser.
-. Execute the top-level `init` function in the script editor.
+. Run `npm run clasp open` to open the on-line script editor in the browser, and execute the top-level function `init` within the opened script editor.
 
 == ⬆️ Code Re-deployment
 
@@ -34,8 +33,7 @@ npm run deploy
 
 If the configuration is changed, you should also regenerate the form _after_ updating the code:
 
-. Run `npm run clasp open` to open the on-line script editor in the browser.
-. Execute the top-level `regenerateForm` function in the script editor to regenerate the form.
+. Run `npm run clasp open` to open the on-line script editor in the browser, and execute the top-level function `regenerateForm` within the script editor to regenerate the form.
 
 == 🧘 Advanced Setup
 
