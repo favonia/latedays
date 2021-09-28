@@ -4,7 +4,7 @@
   "description": "Management of late day requests using Google Forms and Google Sheets",
   "private": true,
   "scripts": {
-    "test": "nyc ts-mocha test/**.ts",
+    "test": "mocha -- --require ts-node/register test/**.ts",
     "build": "webpack",
     "clasp": "mkdir -p dist && cd dist && clasp",
     "deploy": "mkdir -p dist && cd dist && clasp push -f"
@@ -27,9 +27,8 @@
     "@types/webpack": "^5.28.0",
     "copy-webpack-plugin": "^9.0.1",
     "gas-webpack-plugin": "github:fossamagna/gas-webpack-plugin",
-    "nyc": "^15.1.0",
+    "mocha": "^9.1.2",
     "ts-loader": "^9.2.6",
-    "ts-mocha": "^8.0.0",
     "ts-node": "^10.2.1",
     "typescript": "^4.4.3",
     "webpack": "^5.54.0",
