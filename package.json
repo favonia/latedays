@@ -35,7 +35,7 @@
     "webpack-cli": "^4.9.1"
   },
   "dependencies": {
-    "@types/google-apps-script": "^1.0.39",
+    "@types/google-apps-script": "^1.0.41",
     "luxon": "^2.1.1"
   }
 }
