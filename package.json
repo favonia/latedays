@@ -1,6 +1,6 @@
 {
   "name": "latedays",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Management of late day requests using Google Forms and Google Sheets",
   "private": true,
   "scripts": {
