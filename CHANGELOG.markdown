@@ -1,4 +1,13 @@
-# [1.0.1](https://github.com/favonia/latedays/compare/v1.0.0...v1.0.1) (2021-09-18)
+## [1.0.2](https://github.com/favonia/latedays/compare/v1.0.1...v1.0.2) (2021-12-05)
+
+
+### Bug Fixes
+
+* **response:** correct the checking when late days are almost exhausted ([#111](https://github.com/favonia/latedays/issues/111)) ([48f27e8](https://github.com/favonia/latedays/commit/48f27e8a5fbb0d3f5ac45e683f7c1c061a4e5552))
+
+
+
+## [1.0.1](https://github.com/favonia/latedays/compare/v1.0.0...v1.0.1) (2021-09-18)
 
 
 ### Bug Fixes
