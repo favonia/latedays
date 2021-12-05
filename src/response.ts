@@ -154,7 +154,7 @@ function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
             ],
           };
 
-        case request.action.days - entry.days[assignment].used > remaining:
+        case request.action.days - used > remaining:
           return {
             subject: `Late day request for ${assignment} rejected`,
             body: [
