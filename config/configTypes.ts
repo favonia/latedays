@@ -1,5 +1,7 @@
 /** @see `sample.ts` for documentation. */
 
+export type NonEmptyArray<T> = [T, ...T[]];
+
 export interface ActionRefund {
   readonly act: "refund";
   readonly days: number;
@@ -24,7 +26,7 @@ export type Assignments<Assignment extends string> = Readonly<
 
 export type Question<T> = {
   readonly title: string;
-  readonly choices: [string, T][];
+  readonly choices: NonEmptyArray<[string, T]>;
 };
 
 export interface FormSettings<Assignment> {
