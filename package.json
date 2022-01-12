@@ -21,7 +21,6 @@
   "homepage": "https://github.com/favonia/latedays#readme",
   "devDependencies": {
     "@google/clasp": "^2.4.1",
-    "@types/copy-webpack-plugin": "^10.1.0",
     "@types/luxon": "^2.0.9",
     "@types/mocha": "^9.0.0",
     "@types/webpack": "^5.28.0",
