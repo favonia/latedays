@@ -26,7 +26,7 @@
     "@types/webpack": "^5.28.0",
     "copy-webpack-plugin": "^10.2.0",
     "gas-webpack-plugin": "^2.1.0",
-    "mocha": "^9.1.4",
+    "mocha": "^9.2.0",
     "ts-loader": "^9.2.6",
     "ts-node": "^10.4.0",
     "typescript": "^4.5.3",
