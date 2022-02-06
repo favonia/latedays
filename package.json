@@ -24,7 +24,7 @@
     "@types/luxon": "^2.0.9",
     "@types/mocha": "^9.0.0",
     "@types/webpack": "^5.28.0",
-    "copy-webpack-plugin": "^10.2.2",
+    "copy-webpack-plugin": "^10.2.4",
     "gas-webpack-plugin": "^2.1.0",
     "mocha": "^9.1.4",
     "ts-loader": "^9.2.6",
