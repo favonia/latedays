@@ -2,6 +2,8 @@ import config from "../config/config";
 import { fromISO as newTime, addDays, format as formatTime } from "./time";
 import * as sheet from "./sheet";
 import * as form from "./form";
+import Handlebars from "handlebars";
+import baseTemplate from "../templates/D2D base template for all campuses/D2D.html";
 
 type Response = {
   review?: boolean;
@@ -195,6 +197,15 @@ function sendEmail(req: form.Request, res: Response, footer: string[]): void {
     res.body.length && footer.length ? [...res.body, , ...footer] : footer
   ).join("\n");
 
+  var template = Handlebars.compile(baseTemplate);
+  var placeholders = { 
+    "greetings": `Hi ${req.id}`,
+    "approval": `Success.`,
+    "heading": `Hi`,
+    "body": body,
+    "footer": footer
+  };
+
   const cc = res.review ? config.email.courseEmail : undefined;
 
   // XXX Ideally, when `res.review` is true, "Reply-To" should be `[req.email, config.email.courseEmail].join(",")`,
@@ -205,7 +216,7 @@ function sendEmail(req: form.Request, res: Response, footer: string[]): void {
   MailApp.sendEmail({
     to: req.email,
     subject: subject,
-    body: body,
+    htmlBody: template(placeholders),
     cc: cc,
     replyTo: replyTo,
   });

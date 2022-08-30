@@ -105,3 +105,6 @@ dist
 
 # App-specific
 config/config.ts
+
+# IDE 
+.vscode/
