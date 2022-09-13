@@ -2,7 +2,7 @@ import * as lit from './literals'
 
 export interface BodyParams {
     assignment : string,
-    noOfDays : number,
+    numOfDays : number,
     leftDays: number,
     newDeadline : string,
     oldDeadline : string,
@@ -18,8 +18,8 @@ interface EmailLiterals {
 
 interface Literals {
     summary: EmailLiterals,
-    refund: Record<"beyond" | "unleft" | "received" | "approved" ,EmailLiterals>,
-    request: Record<"beyond" | "local" | "global" | "approved" , EmailLiterals>,
+    refund: Record<"beyond" | "unused" | "received" | "approved" ,EmailLiterals>,
+    request: Record<"beyond" | "unused" | "global" | "approved" , EmailLiterals>,
 }
 
 const defaultLiterals: EmailLiterals = {
@@ -40,10 +40,10 @@ const refundBeyondLiteral: EmailLiterals = {
     subject: lit.refundRejSubject,
     body: lit.refBeyondBody,
 }
-const refundUnleftLiteral: EmailLiterals = {
+const refundUnusedLiteral: EmailLiterals = {
     ...defaultLiterals,
     subject: lit.refundRejSubject,
-    body: lit.refUnleftBody,
+    body: lit.refUnusedBody,
 }
 const refundReceiveLiteral: EmailLiterals = {
     ...defaultLiterals,
@@ -61,10 +61,10 @@ const requestBeyondLiteral: EmailLiterals = {
     subject: lit.requestRejSubject,
     body: lit.reqBeyondBody,
 }
-const requestLocalLiteral: EmailLiterals = {
+const requestUnusedLiteral: EmailLiterals = {
     ...defaultLiterals,
     subject: lit.requestRejSubject,
-    body: lit.reqLoBody,
+    body: lit.reqUnusedBody,
 }
 const requestGlobalLiteral: EmailLiterals = {
     ...defaultLiterals,
@@ -83,12 +83,12 @@ const literal : Literals = {
     refund: {
         beyond: refundBeyondLiteral,
         received: refundReceiveLiteral,
-        unleft: refundUnleftLiteral,
+        unused: refundUnusedLiteral,
         approved: refundApproveLiteral,
     },
     request: {
         beyond: requestBeyondLiteral,
-        local: requestLocalLiteral,
+        unused: requestUnusedLiteral,
         global: requestGlobalLiteral,
         approved: requestApproveLiteral,
     },

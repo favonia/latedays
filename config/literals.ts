@@ -12,18 +12,18 @@ export const refBeyondBody = ({assignment: a, oldDeadline: t}: Partial<BodyParam
   `Please check the rules in the syllabus.`,
 ];
 
-export const refUnleftBody = ({assignment: a, oldDeadline: t}: Partial<BodyParams>) => [
+export const refUnusedBody = ({assignment: a, oldDeadline: t}: Partial<BodyParams>) => [
   `You didn't use any late days for ${a}.`,
   `The original deadline for ${a} is ${t}.`,
 ];
 
-export const refRecBody = ({noOfDays: d}: Partial<BodyParams>) => [
+export const refRecBody = ({numOfDays: d}: Partial<BodyParams>) => [
   `You requested a refund of ${d} late day(s).`,
   `It will take some time for us to review your refund request.`,
   `Reply-all (not just reply) to this email if nothing happens in a week.`,
 ];
 
-export const refAppBody = ({assignment: a, noOfDays: d, oldDeadline: to, newDeadline: tn, freeDayMsg: f}: Partial<BodyParams>) => [
+export const refAppBody = ({assignment: a, numOfDays: d, oldDeadline: to, newDeadline: tn, freeDayMsg: f}: Partial<BodyParams>) => [
   `This is a confirmation that you got ${d} late day(s) refunded for ${a}.`,
   ...(f ? f : []),
   `The original deadline for ${a} is ${to}.`,
@@ -36,16 +36,16 @@ export const reqBeyondBody = ({assignment: a, oldDeadline: t}: Partial<BodyParam
   `Please check the rules in the syllabus.`,
 ];
 
-export const reqLoBody = ({noOfDays: d}: Partial<BodyParams>) => [
+export const reqUnusedBody = ({numOfDays: d}: Partial<BodyParams>) => [
   `You've already spent ${d} late day(s), so you cannot request fewer late day(s).`,
   `For refund, please choose the refund options.`,
 ];
 
-export const reqGloBody = ({assignment: a, noOfDays: d, leftDays: l}: Partial<BodyParams>) => [
+export const reqGloBody = ({assignment: a, numOfDays: d, leftDays: l}: Partial<BodyParams>) => [
   `You cannot request ${d} late day(s) for ${a}, because you only have ${l} late day(s) available.`,
 ];
 
-export const reqAppBody = ({assignment: a, noOfDays: d, oldDeadline: to, newDeadline: tn, freeDayMsg: f}: Partial<BodyParams>) => [
+export const reqAppBody = ({assignment: a, numOfDays: d, oldDeadline: to, newDeadline: tn, freeDayMsg: f}: Partial<BodyParams>) => [
   `This is a confirmation that you spent ${d} day(s) for ${a}.`,
   ...(f ? f : []),
   `The original deadline for ${a} is ${to}.`,
