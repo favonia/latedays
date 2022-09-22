@@ -2,9 +2,6 @@ import config from "../config/config";
 import { fromISO as newTime, addDays, format as formatTime } from "./time";
 import * as sheet from "./sheet";
 import * as form from "./form";
-import literal from "../config/literalTypes";
-import Handlebars from "handlebars";
-import baseTemplate from "../templates/base.html";
 
 type Response = {
   review?: boolean;
@@ -12,7 +9,7 @@ type Response = {
   body: string[];
 };
 
-export function formatSummary(entry: sheet.Entry): string[] {
+function formatSummary(entry: sheet.Entry): string[] {
   const latedays: string[] = [];
   Object.entries(entry.days).forEach(([assign, days]) => {
     if (days.used + days.free > 0) {
@@ -41,7 +38,7 @@ export function formatSummary(entry: sheet.Entry): string[] {
       ];
 }
 
-export function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
+function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
   const assignment = request.assignment;
   const deadline = newTime(config.assignments[assignment].deadline);
 
@@ -61,8 +58,8 @@ export function updateAndRespond(entry: sheet.Entry, request: form.Request): Res
   switch (request.action.act) {
     case "summary":
       return {
-        subject: literal.summary.subject(), // `Late day summary`,
-        body: literal.summary.body({}),
+        subject: `Late day summary`,
+        body: [],
       };
 
     case "refund": {
@@ -75,24 +72,36 @@ export function updateAndRespond(entry: sheet.Entry, request: form.Request): Res
       switch (true) {
         case request.time > addDays(deadline, config.policy.refundPeriodInDays):
           return {
-            subject: literal.refund.beyond.subject(assignment),
-            body: literal.refund.beyond.body({
-              assignment: assignment,
-              oldDeadline: formatTime(addDays(deadline, config.policy.refundPeriodInDays))
-            })
+            subject: `Late day refund request for ${assignment} rejected`,
+            body: [
+              `It is too late to request the refund for ${assignment}.`,
+              `The request should have been made by ${formatTime(
+                addDays(deadline, config.policy.refundPeriodInDays)
+              )}.`,
+              `Please check the rules in the syllabus.`,
+            ],
           };
 
         case used === 0:
           return {
-            subject: literal.refund.unused.subject(assignment),
-            body: literal.refund.unused.body({assignment: assignment, oldDeadline: formatTime(deadline)}),
+            subject: `Late day refund request for ${assignment} rejected`,
+            body: [
+              `You didn't use any late days for ${assignment}.`,
+              `The original deadline for ${assignment} is ${formatTime(
+                deadline
+              )}.`,
+            ],
           };
 
         case request.time > newDeadlineWithoutFreeDays:
           return {
             review: true,
-            subject: literal.refund.received.subject(assignment),
-            body: literal.refund.received.body({numOfDays: request.action.days}),
+            subject: `Late day refund request for ${assignment} received`,
+            body: [
+              `You requested a refund of ${request.action.days} late day(s).`,
+              `It will take some time for us to review your refund request.`,
+              `Reply-all (not just reply) to this email if nothing happens in a week.`,
+            ],
           };
 
         default: {
@@ -102,14 +111,20 @@ export function updateAndRespond(entry: sheet.Entry, request: form.Request): Res
             Math.max(0, used - request.action.days) + free
           );
           return {
-            subject: literal.refund.approved.subject(assignment, formatTime(newDeadline)),
-            body: literal.refund.approved.body({
-              assignment: assignment,
-              numOfDays: Math.min(used,request.action.days),
-              oldDeadline: formatTime(deadline),
-              newDeadline: formatTime(newDeadline),
-              freeDayMsg: freeDaysMessage,
-            }),
+            subject: `Late day request for ${assignment} approved: new deadline ${formatTime(
+              newDeadline
+            )}`,
+            body: [
+              `This is a confirmation that you got ${Math.min(
+                used,
+                request.action.days
+              )} late day(s) refunded for ${assignment}.`,
+              ...freeDaysMessage,
+              `The original deadline for ${assignment} is ${formatTime(
+                deadline
+              )}.`,
+              `The new deadline is ${formatTime(newDeadline)}.`,
+            ],
           };
         }
       }
@@ -120,37 +135,50 @@ export function updateAndRespond(entry: sheet.Entry, request: form.Request): Res
         case request.time >
           addDays(deadline, config.policy.requestPeriodInDays):
           return {
-            subject: literal.request.beyond.subject(assignment),
-            body: literal.request.beyond.body({
-              assignment: assignment,
-              oldDeadline: formatTime(addDays(deadline, config.policy.requestPeriodInDays)),
-            }),
+            subject: `Late day request rejected`,
+            body: [
+              `It is too late to request late days for ${assignment}.`,
+              `The request should have been made by ${formatTime(
+                addDays(deadline, config.policy.requestPeriodInDays)
+              )}.`,
+              `Please check the rules in the syllabus.`,
+            ],
           };
 
         case request.action.days < used:
           return {
-            subject: literal.request.unused.subject(assignment),
-            body: literal.request.unused.body({numOfDays: used}),
+            subject: `Late day request for ${assignment} rejected`,
+            body: [
+              `You've already spent ${used} late day(s), so you cannot request fewer late day(s).`,
+              `For refund, please choose the refund options.`,
+            ],
           };
 
         case request.action.days - used > remaining:
           return {
-            subject: literal.request.global.subject(assignment),
-            body: literal.request.global.body({assignment: assignment, numOfDays: request.action.days, leftDays: remaining}),
+            subject: `Late day request for ${assignment} rejected`,
+            body: [
+              `You cannot request ${request.action.days} late day(s) for ${assignment}, because you only have ${remaining} late day(s) available.`,
+            ],
           };
 
         default: {
           entry.days[assignment].used = request.action.days;
           const newDeadline = addDays(deadline, request.action.days + free);
           return {
-            subject: literal.request.approved.subject(assignment, formatTime(newDeadline)),
-            body: literal.request.approved.body({
-              assignment: assignment,
-              numOfDays: request.action.days,
-              oldDeadline: formatTime(deadline),
-              newDeadline: formatTime(newDeadline),
-              freeDayMsg: freeDaysMessage,
-            }),
+            subject: `Late day request for ${assignment} approved: new deadline ${formatTime(
+              newDeadline
+            )}`,
+            body: [
+              `This is a confirmation that you spent ${request.action.days} day(s) for ${assignment}.`,
+              ...freeDaysMessage,
+              `The original deadline for ${assignment} is ${formatTime(
+                deadline
+              )}.`,
+              `The new deadline for ${assignment} is ${formatTime(
+                newDeadline
+              )}.`,
+            ],
           };
         }
       }
@@ -167,15 +195,6 @@ function sendEmail(req: form.Request, res: Response, footer: string[]): void {
     res.body.length && footer.length ? [...res.body, , ...footer] : footer
   ).join("\n");
 
-  var template = Handlebars.compile(baseTemplate);
-  var placeholders = { 
-    "greetings": `Hi ${req.id}`,
-    "approval": `Success.`,
-    "heading": `emailLiterals`,
-    "body": body,
-    "footer": footer
-  };
-
   const cc = res.review ? config.email.courseEmail : undefined;
 
   // XXX Ideally, when `res.review` is true, "Reply-To" should be `[req.email, config.email.courseEmail].join(",")`,
@@ -186,7 +205,7 @@ function sendEmail(req: form.Request, res: Response, footer: string[]): void {
   MailApp.sendEmail({
     to: req.email,
     subject: subject,
-    htmlBody: template(placeholders),
+    body: body,
     cc: cc,
     replyTo: replyTo,
   });
