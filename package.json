@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/favonia/latedays#readme",
   "devDependencies": {
-    "@google/clasp": "^2.4.1",
+    "@google/clasp": "^2.4.2",
     "@types/luxon": "^3.0.1",
     "@types/mocha": "^9.1.1",
     "@types/webpack": "^5.28.0",
