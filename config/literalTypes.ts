@@ -6,7 +6,7 @@ export interface BodyParams {
     leftDays: number,
     newDeadline : string,
     oldDeadline : string,
-    freeDayMsg: string[],
+    freeDays: number,
 }
 
 interface EmailLiterals {

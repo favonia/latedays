@@ -2,7 +2,7 @@ import { Assignment } from "../config/config";
 import { fromISO as newTime, addDays, Time, format as formatTime } from "./time";
 import * as sheet from "./sheet";
 import * as form from "./form";
-import config from "../config/config";
+import config, { isAssignment } from "../config/config";
 import literal from "../config/literalTypes";
 
 type UpdateSummary = {
@@ -11,11 +11,11 @@ type UpdateSummary = {
   usage: Array<{
     assignment: Assignment,
     free: number,
-    totalUsed: number,
+    used: number,
   }>,
 };
 
-type Response = {
+export type Response = {
   assignment : Assignment,
   success: boolean,
   review?: boolean,
@@ -24,6 +24,30 @@ type Response = {
   freeDays?: string[],
   comments?: string[],
 };
+
+function formatSummary(entry: sheet.Entry): UpdateSummary {
+  const latedays: UpdateSummary = {
+    remainingDays: 0,
+    usage: [],
+  };
+  Object.entries(entry.days).forEach(([assign, days]) => {
+    if ((days.used + days.free > 0) && isAssignment(assign)) {
+      latedays.usage.push({
+        assignment: assign,
+        free: days.free,
+        used: days.used
+      });
+    }
+  });
+
+  latedays.remainingDays =
+    config.policy.maxLateDays -
+    Object.values(entry.days)
+      .map((days) => days.used)
+      .reduce((a, b) => a + b, 0);
+
+  return latedays;
+}
 
 // TODO: integrate with the rest
 function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
@@ -92,7 +116,7 @@ function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
             numOfDays: Math.min(used,request.action.days),
             oldDeadline: formatTime(deadline),
             newDeadline: formatTime(newDeadline),
-            freeDayMsg: [],   // TODO
+            freeDays: free,
           });
         }
       }
@@ -136,7 +160,7 @@ function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
             numOfDays: request.action.days,
             oldDeadline: formatTime(deadline),
             newDeadline: formatTime(newDeadline),
-            freeDayMsg: [],
+            freeDays: free,
           });
           break;
         }
@@ -145,6 +169,6 @@ function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
 
     default: {}
   }
- // add summary
+  resp.updateSummary = formatSummary(entry);
   return resp;
 }

@@ -108,7 +108,7 @@ export function updateAndRespond(entry: sheet.Entry, request: form.Request): Res
               numOfDays: Math.min(used,request.action.days),
               oldDeadline: formatTime(deadline),
               newDeadline: formatTime(newDeadline),
-              freeDayMsg: freeDaysMessage,
+              freeDays: free,
             }),
           };
         }
@@ -149,7 +149,7 @@ export function updateAndRespond(entry: sheet.Entry, request: form.Request): Res
               numOfDays: request.action.days,
               oldDeadline: formatTime(deadline),
               newDeadline: formatTime(newDeadline),
-              freeDayMsg: freeDaysMessage,
+              freeDays: free,
             }),
           };
         }

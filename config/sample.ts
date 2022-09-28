@@ -1,9 +1,16 @@
 import type { Action, Question, Config } from "./configTypes";
 export { Action, Question, Config };
 
+const assignment_ = ["Homework 1", "Homework 2"] as const;
+
 // Assignment the type of assignment IDs. Use union types instead of just `string`
 // to fully utilize TypeScript's type-checking.
-export type Assignment = "Homework 1" | "Homework 2";
+
+// same as export type Assignment = "Homework 1" | "Homework 2";
+export type Assignment = (typeof assignment_)[number];
+
+// Validate strings for assignment types
+export const isAssignment = (x: any): x is Assignment => assignment_.includes(x);
 
 export const config: Config<Assignment> = {
   // Timezone used to format deadlines in email messages
