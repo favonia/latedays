@@ -1,10 +1,7 @@
 import { BodyParams } from "./literalTypes";
 
-export const refundRejSubject = (assignment?: string) => `Late day refund request for ${assignment} rejected`;
-export const refundRecSubject = (assignment?: string) =>  `Late day refund request for ${assignment} received`;
-export const refundAppSubject = (a?: string, t?: string) =>  `Late day request for ${a} approved: new deadline ${t}`;
-export const requestRejSubject = (assignment?: string) => `Late day request for ${assignment} rejected`;
-export const requestAppSubject = (a?: string, t?: string) => `Late day request for ${a} approved: new deadline ${t}`;
+export const emailSubject = (type:string, a: string, success?: boolean, t?: string) => `Late day ${type} for ${a} `+
+  (success===undefined? `received`: (success?`approved: new deadline ${t}`: `rejected`));
 
 export const refBeyondBody = ({assignment: a, oldDeadline: t}: Partial<BodyParams>) => [
   `It is too late to request the refund for ${a}.`,

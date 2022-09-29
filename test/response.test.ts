@@ -2,7 +2,7 @@
 jest.mock("../src/props", jest.fn());
 jest.mock("../templates/base.html", jest.fn());
 
-import { updateAndRespond } from "../src/response";
+import { updateAndRespond } from "../src/responseType";
 import { Request } from "../src/form";
 import { Entry } from "../src/sheet";
 import { DateTime } from "luxon";
@@ -38,6 +38,7 @@ jest.mock("../config/config", () => {
 });
 
 import config from "../config/config";
+import { timeFormatLiteral } from "../config/literalTypes";
 
 const testRequest : Request = {
   id: "",
@@ -64,7 +65,7 @@ describe("testing Responses", () => {
         ...testRequest,
         action: {act: "summary"}
       };
-      expect(updateAndRespond(testEntry, summaryRequest).body).toStrictEqual([]);
+      expect(updateAndRespond(testEntry, summaryRequest).comments).toStrictEqual([]);
     });
 
     test("responds appropriately when requesting refund beyond policy refund days", () => {
@@ -74,9 +75,9 @@ describe("testing Responses", () => {
         action: {act: "refund", days: 1000000}
       };
       expect(
-        updateAndRespond(testEntry, refundRequest).body
+        updateAndRespond(testEntry, refundRequest).comments
       ).toStrictEqual(
-        literal.refBeyondBody({
+        timeFormatLiteral(literal.refBeyondBody)({
           assignment: defaultAssignment, 
           oldDeadline: addDays(
             DateTime.fromISO(config.assignments[defaultAssignment].deadline),
@@ -101,9 +102,9 @@ describe("testing Responses", () => {
         }
       };
       expect(
-        updateAndRespond(refundEntry, refundRequest).body
+        updateAndRespond(refundEntry, refundRequest).comments
       ).toStrictEqual(
-        literal.refUnusedBody({
+        timeFormatLiteral(literal.refUnusedBody)({
           assignment: defaultAssignment, 
           oldDeadline: DateTime.fromISO(config.assignments[defaultAssignment].deadline),
         })
@@ -117,7 +118,7 @@ describe("testing Responses", () => {
         action: {act: "refund", days: 1000000}
       };
       expect(
-        updateAndRespond(testEntry, refundRequest).body
+        updateAndRespond(testEntry, refundRequest).comments
       ).toStrictEqual(
         literal.refRecBody({numOfDays: 1000000}),
       );
@@ -141,9 +142,9 @@ describe("testing Responses", () => {
       };
       expect(refundEntry.days[defaultAssignment].used).toBe(usedDays);  // 3 day before
       expect(
-        updateAndRespond(refundEntry, refundRequest).subject
+        updateAndRespond(refundEntry, refundRequest).state.new?.deadline
       ).toStrictEqual(
-        literal.refundAppSubject(defaultAssignment, formatTime(DateTime.fromISO("2022-02-03T17:00:00-06:00")))
+        DateTime.fromISO("2022-02-03T17:00:00-06:00").setZone(config.timezone)
       );
       expect(refundEntry.days[defaultAssignment].used).toBe(usedDays-refundDays);  // 1 day refunded successfully
     });
@@ -155,9 +156,9 @@ describe("testing Responses", () => {
         action: {act: "request", days: 7}
       };
       expect(
-        updateAndRespond(testEntry, reqRequest).body
+        updateAndRespond(testEntry, reqRequest).comments
       ).toStrictEqual(
-        literal.reqBeyondBody({
+        timeFormatLiteral(literal.reqBeyondBody)({
           assignment: defaultAssignment, 
           oldDeadline: DateTime.fromISO("2022-02-05T17:00:00-06:00")}),
       );
@@ -179,7 +180,7 @@ describe("testing Responses", () => {
         }
       };
       expect(
-        updateAndRespond(refundEntry, reqRequest).body
+        updateAndRespond(refundEntry, reqRequest).comments
       ).toStrictEqual(
         literal.reqUnusedBody({numOfDays: 1000}),
       );
@@ -192,7 +193,7 @@ describe("testing Responses", () => {
         action: {act: "request", days: 100000},     // too many days requested
       };
       expect(
-        updateAndRespond(testEntry, reqRequest).body
+        updateAndRespond(testEntry, reqRequest).comments
       ).toStrictEqual(
         literal.reqGloBody({numOfDays: 100000, assignment: defaultAssignment, leftDays: 9}),
       );
@@ -215,9 +216,9 @@ describe("testing Responses", () => {
       };
       expect(reqEntry.days[defaultAssignment].used).toBe(1);  // 1 day before
       expect(
-        updateAndRespond(reqEntry, reqRequest).subject
+        updateAndRespond(reqEntry, reqRequest).state.new?.deadline,
       ).toStrictEqual(
-        literal.requestAppSubject(defaultAssignment, formatTime(DateTime.fromISO("2022-02-05T17:00:00-06:00"))),
+        DateTime.fromISO("2022-02-05T18:00:00-05:00").setZone(config.timezone),
       );
       expect(reqEntry.days[defaultAssignment].used).toBe(4);  // 5 days after
     });

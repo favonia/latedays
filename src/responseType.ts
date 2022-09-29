@@ -1,5 +1,5 @@
 import { Assignment } from "../config/config";
-import { fromISO as newTime, addDays, Time, format as formatTime } from "./time";
+import { fromISO as newTime, addDays, Time } from "./time";
 import * as sheet from "./sheet";
 import * as form from "./form";
 import config, { isAssignment } from "../config/config";
@@ -17,7 +17,7 @@ type UpdateSummary = {
 
 export type Response = {
   assignment : Assignment,
-  success: boolean,
+  success?: boolean,
   review?: boolean,
   state: Partial<Record<"old" | "new", {deadline: Time, used: number}>>,
   updateSummary: UpdateSummary,
@@ -63,7 +63,6 @@ export function updateAndRespond(entry: sheet.Entry, request: form.Request): Res
   const free = entry.days[assignment].free;
   let resp : Response = {
     assignment: assignment,
-    success: true,
     state: {
       "old": {deadline: deadline, used: used},
     },
@@ -96,11 +95,11 @@ export function updateAndRespond(entry: sheet.Entry, request: form.Request): Res
           break;
 
         case request.time > newDeadlineWithoutFreeDays:
-          resp.review= true;
           resp.comments= literal.refund.received.body({numOfDays: request.action.days});
           break;
 
         default: {
+          resp.success= true;
           entry.days[assignment].used = Math.max(0, used - request.action.days);
           const newDeadline = addDays(
             deadline,
@@ -150,6 +149,7 @@ export function updateAndRespond(entry: sheet.Entry, request: form.Request): Res
         default: {
           entry.days[assignment].used = request.action.days;
           const newDeadline = addDays(deadline, request.action.days + free);
+          resp.success= true;
           resp.state.new = {
             deadline: newDeadline,
             used: entry.days[assignment].used

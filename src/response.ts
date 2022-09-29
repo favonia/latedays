@@ -1,180 +1,14 @@
 import config from "../config/config";
-import { fromISO as newTime, addDays, format as formatTime } from "./time";
 import * as sheet from "./sheet";
 import * as form from "./form";
-import literal from "../config/literalTypes";
-import Handlebars from "handlebars";
-import baseTemplate from "../templates/base.html";
+import { Response, updateAndRespond } from "./responseType";
+import { getEmailSubject, renderHTML } from "./renderer";
 
-type Response = {
-  review?: boolean;
-  subject: string;
-  body: string[];
-};
-
-export function formatSummary(entry: sheet.Entry): string[] {
-  const latedays: string[] = [];
-  Object.entries(entry.days).forEach(([assign, days]) => {
-    if (days.used + days.free > 0) {
-      latedays.push(
-        `- ${assign}: ${days.used + days.free} day(s)` +
-          (days.free > 0 ? ` (including ${days.free} free late day(s))` : "")
-      );
-    }
-  });
-
-  let remaining =
-    config.policy.maxLateDays -
-    Object.values(entry.days)
-      .map((days) => days.used)
-      .reduce((a, b) => a + b, 0);
-
-  return latedays.length > 0
-    ? [
-        "You have applied these late day(s):",
-        ...latedays,
-        `Remaining late day(s): ${remaining}`,
-      ]
-    : [
-        `You have not spent any late day.`,
-        `Remaining late day(s): ${remaining}`,
-      ];
-}
-
-export function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
-  const assignment = request.assignment;
-  const deadline = newTime(config.assignments[assignment].deadline);
-
-  const remaining =
-    config.policy.maxLateDays -
-    Object.values(entry.days)
-      .map((days) => days.used)
-      .reduce((a, b) => a + b, 0);
-
-  const used = entry.days[assignment].used;
-  const free = entry.days[assignment].free;
-  const freeDaysMessage =
-    free > 0
-      ? [`You also received ${free} free late day(s) for ${assignment}.`]
-      : [];
-
-  switch (request.action.act) {
-    case "summary":
-      return {
-        subject: literal.summary.subject(), // `Late day summary`,
-        body: literal.summary.body({}),
-      };
-
-    case "refund": {
-      // refund
-      const newDeadlineWithoutFreeDays = addDays(
-        deadline,
-        Math.max(0, used - request.action.days)
-      );
-
-      switch (true) {
-        case request.time > addDays(deadline, config.policy.refundPeriodInDays):
-          return {
-            subject: literal.refund.beyond.subject(assignment),
-            body: literal.refund.beyond.body({
-              assignment: assignment,
-              oldDeadline: addDays(deadline, config.policy.refundPeriodInDays)
-            })
-          };
-
-        case used === 0:
-          return {
-            subject: literal.refund.unused.subject(assignment),
-            body: literal.refund.unused.body({assignment: assignment, oldDeadline: deadline}),
-          };
-
-        case request.time > newDeadlineWithoutFreeDays:
-          return {
-            review: true,
-            subject: literal.refund.received.subject(assignment),
-            body: literal.refund.received.body({numOfDays: request.action.days}),
-          };
-
-        default: {
-          entry.days[assignment].used = Math.max(0, used - request.action.days);
-          const newDeadline = addDays(
-            deadline,
-            Math.max(0, used - request.action.days) + free
-          );
-          return {
-            subject: literal.refund.approved.subject(assignment, formatTime(newDeadline)),
-            body: literal.refund.approved.body({
-              assignment: assignment,
-              numOfDays: Math.min(used,request.action.days),
-              oldDeadline: deadline,
-              newDeadline: newDeadline,
-              freeDays: free,
-            }),
-          };
-        }
-      }
-    }
-
-    case "request": {
-      switch (true) {
-        case request.time >
-          addDays(deadline, config.policy.requestPeriodInDays):
-          return {
-            subject: literal.request.beyond.subject(assignment),
-            body: literal.request.beyond.body({
-              assignment: assignment,
-              oldDeadline: addDays(deadline, config.policy.requestPeriodInDays),
-            }),
-          };
-
-        case request.action.days < used:
-          return {
-            subject: literal.request.unused.subject(assignment),
-            body: literal.request.unused.body({numOfDays: used}),
-          };
-
-        case request.action.days - used > remaining:
-          return {
-            subject: literal.request.global.subject(assignment),
-            body: literal.request.global.body({assignment: assignment, numOfDays: request.action.days, leftDays: remaining}),
-          };
-
-        default: {
-          entry.days[assignment].used = request.action.days;
-          const newDeadline = addDays(deadline, request.action.days + free);
-          return {
-            subject: literal.request.approved.subject(assignment, formatTime(newDeadline)),
-            body: literal.request.approved.body({
-              assignment: assignment,
-              numOfDays: request.action.days,
-              oldDeadline: deadline,
-              newDeadline: newDeadline,
-              freeDays: free,
-            }),
-          };
-        }
-      }
-    }
-  }
-}
-
-function sendEmail(req: form.Request, res: Response, footer: string[]): void {
+function sendEmail(req: form.Request, res: Response): void {
+  const resSubject = getEmailSubject(req.action.act, res);
   const subject = config.email.subjectPrefix
-    ? `${config.email.subjectPrefix} ${res.subject}`
-    : res.subject;
-
-  const body = (
-    res.body.length && footer.length ? [...res.body, , ...footer] : footer
-  ).join("\n");
-
-  var template = Handlebars.compile(baseTemplate);
-  var placeholders = { 
-    "greetings": `Hi ${req.id}`,
-    "approval": `Success.`,
-    "heading": `emailLiterals`,
-    "body": body,
-    "footer": footer
-  };
+    ? `${config.email.subjectPrefix} ${resSubject}`
+    : resSubject;
 
   const cc = res.review ? config.email.courseEmail : undefined;
 
@@ -186,7 +20,7 @@ function sendEmail(req: form.Request, res: Response, footer: string[]): void {
   MailApp.sendEmail({
     to: req.email,
     subject: subject,
-    htmlBody: template(placeholders),
+    htmlBody: renderHTML(req, res),
     cc: cc,
     replyTo: replyTo,
   });
@@ -205,6 +39,5 @@ export function handle(event: GoogleAppsScript.Events.FormsOnFormSubmit): void {
   const response = updateAndRespond(entry, request);
   sheet.updateRecord(ds, entry);
 
-  const usageSummary = formatSummary(entry);
-  sendEmail(request, response, usageSummary);
+  sendEmail(request, response);
 }
