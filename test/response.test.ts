@@ -78,9 +78,9 @@ describe("testing Responses", () => {
       ).toStrictEqual(
         literal.refBeyondBody({
           assignment: defaultAssignment, 
-          oldDeadline: formatTime(addDays(
+          oldDeadline: addDays(
             DateTime.fromISO(config.assignments[defaultAssignment].deadline),
-            config.policy.refundPeriodInDays))
+            config.policy.refundPeriodInDays)
         })
       );
     });
@@ -105,7 +105,7 @@ describe("testing Responses", () => {
       ).toStrictEqual(
         literal.refUnusedBody({
           assignment: defaultAssignment, 
-          oldDeadline: formatTime(DateTime.fromISO(config.assignments[defaultAssignment].deadline)),
+          oldDeadline: DateTime.fromISO(config.assignments[defaultAssignment].deadline),
         })
       );
     });
@@ -159,7 +159,7 @@ describe("testing Responses", () => {
       ).toStrictEqual(
         literal.reqBeyondBody({
           assignment: defaultAssignment, 
-          oldDeadline: formatTime(DateTime.fromISO("2022-02-05T17:00:00-06:00"))}),
+          oldDeadline: DateTime.fromISO("2022-02-05T17:00:00-06:00")}),
       );
     });
 

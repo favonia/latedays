@@ -20,7 +20,7 @@ export type Response = {
   success: boolean,
   review?: boolean,
   state: Partial<Record<"old" | "new", {deadline: Time, used: number}>>,
-  updateSummary?: UpdateSummary,
+  updateSummary: UpdateSummary,
   freeDays?: string[],
   comments?: string[],
 };
@@ -49,8 +49,7 @@ function formatSummary(entry: sheet.Entry): UpdateSummary {
   return latedays;
 }
 
-// TODO: integrate with the rest
-function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
+export function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
   const assignment = request.assignment;
   const deadline = newTime(config.assignments[assignment].deadline);
 
@@ -62,13 +61,13 @@ function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
 
   const used = entry.days[assignment].used;
   const free = entry.days[assignment].free;
-  const resp: Response = {
+  let resp : Response = {
     assignment: assignment,
     success: true,
     state: {
       "old": {deadline: deadline, used: used},
-    }
-  };
+    },
+  } as Response;
 
   switch (request.action.act) {
     case "summary":
@@ -87,13 +86,13 @@ function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
           resp.success= false;
           resp.comments= literal.refund.beyond.body({
             assignment: assignment,
-            oldDeadline: formatTime(addDays(deadline, config.policy.refundPeriodInDays))
+            oldDeadline: addDays(deadline, config.policy.refundPeriodInDays)
           })
           break;
 
         case used === 0:
           resp.success= false;
-          resp.comments= literal.refund.unused.body({assignment: assignment, oldDeadline: formatTime(deadline)});
+          resp.comments= literal.refund.unused.body({assignment: assignment, oldDeadline: deadline});
           break;
 
         case request.time > newDeadlineWithoutFreeDays:
@@ -114,8 +113,8 @@ function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
           resp.comments= literal.refund.approved.body({
             assignment: assignment,
             numOfDays: Math.min(used,request.action.days),
-            oldDeadline: formatTime(deadline),
-            newDeadline: formatTime(newDeadline),
+            oldDeadline: deadline,
+            newDeadline: newDeadline,
             freeDays: free,
           });
         }
@@ -130,7 +129,7 @@ function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
           resp.success= false;
           resp.comments= literal.request.beyond.body({
             assignment: assignment,
-            oldDeadline: formatTime(addDays(deadline, config.policy.requestPeriodInDays)),
+            oldDeadline: addDays(deadline, config.policy.requestPeriodInDays),
           });
           break;
 
@@ -158,8 +157,8 @@ function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
           resp.comments = literal.request.approved.body({
             assignment: assignment,
             numOfDays: request.action.days,
-            oldDeadline: formatTime(deadline),
-            newDeadline: formatTime(newDeadline),
+            oldDeadline: deadline,
+            newDeadline: newDeadline,
             freeDays: free,
           });
           break;

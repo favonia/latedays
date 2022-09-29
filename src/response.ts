@@ -78,14 +78,14 @@ export function updateAndRespond(entry: sheet.Entry, request: form.Request): Res
             subject: literal.refund.beyond.subject(assignment),
             body: literal.refund.beyond.body({
               assignment: assignment,
-              oldDeadline: formatTime(addDays(deadline, config.policy.refundPeriodInDays))
+              oldDeadline: addDays(deadline, config.policy.refundPeriodInDays)
             })
           };
 
         case used === 0:
           return {
             subject: literal.refund.unused.subject(assignment),
-            body: literal.refund.unused.body({assignment: assignment, oldDeadline: formatTime(deadline)}),
+            body: literal.refund.unused.body({assignment: assignment, oldDeadline: deadline}),
           };
 
         case request.time > newDeadlineWithoutFreeDays:
@@ -106,8 +106,8 @@ export function updateAndRespond(entry: sheet.Entry, request: form.Request): Res
             body: literal.refund.approved.body({
               assignment: assignment,
               numOfDays: Math.min(used,request.action.days),
-              oldDeadline: formatTime(deadline),
-              newDeadline: formatTime(newDeadline),
+              oldDeadline: deadline,
+              newDeadline: newDeadline,
               freeDays: free,
             }),
           };
@@ -123,7 +123,7 @@ export function updateAndRespond(entry: sheet.Entry, request: form.Request): Res
             subject: literal.request.beyond.subject(assignment),
             body: literal.request.beyond.body({
               assignment: assignment,
-              oldDeadline: formatTime(addDays(deadline, config.policy.requestPeriodInDays)),
+              oldDeadline: addDays(deadline, config.policy.requestPeriodInDays),
             }),
           };
 
@@ -147,8 +147,8 @@ export function updateAndRespond(entry: sheet.Entry, request: form.Request): Res
             body: literal.request.approved.body({
               assignment: assignment,
               numOfDays: request.action.days,
-              oldDeadline: formatTime(deadline),
-              newDeadline: formatTime(newDeadline),
+              oldDeadline: deadline,
+              newDeadline: newDeadline,
               freeDays: free,
             }),
           };
