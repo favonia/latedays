@@ -1,4 +1,4 @@
-import { DateTime } from "luxon";
+import { DateTime, Interval } from "luxon";
 import config from "../config/config";
 
 // The type of time across the scripts.
@@ -29,4 +29,10 @@ export function format(t: Time): string {
     .setLocale("en")
     .setZone(config.timezone)
     .toLocaleString(DateTime.DATETIME_FULL_WITH_SECONDS);
+}
+
+export function timeDiff(submit: string, deadline: string): number {
+  const date1 = fromISO(submit)
+  const date2 = fromISO(deadline)
+  return Interval.fromDateTimes(date1, date2).length('days')
 }
