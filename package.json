@@ -22,7 +22,7 @@
   "devDependencies": {
     "@google/clasp": "^2.4.2",
     "@types/jest": " ^29.0.0",
-    "@types/luxon": "^3.0.1",
+    "@types/luxon": "^3.0.2",
     "@types/mocha": "^10.0.0",
     "@types/webpack": "^5.28.0",
     "copy-webpack-plugin": "^11.0.0",

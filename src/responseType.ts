@@ -3,7 +3,7 @@ import { fromISO as newTime, addDays, Time } from "./time";
 import * as sheet from "./sheet";
 import * as form from "./form";
 import config, { isAssignment } from "../config/config";
-import literal from "../config/literalTypes";
+import literal from "../literals/literalTypes";
 
 type UpdateSummary = {
   remainingDays: number,

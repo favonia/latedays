@@ -1,5 +1,5 @@
 import { Response } from "./responseType";
-import literal from "../config/literalTypes";
+import literal from "../literals/literalTypes";
 import * as form from "./form";
 import Handlebars from "handlebars";
 import baseTemplate from "../templates/base.html";

@@ -1,5 +1,5 @@
 import * as lit from './literals'
-import {format as formatTime } from "../src/time";
+import { format as formatTime } from "../src/time";
 import { DateTime } from 'luxon';
 
 export interface BodyParams {
@@ -11,9 +11,11 @@ export interface BodyParams {
     freeDays: number,
 }
 
-// A wrapper function to convert any time variable in any literal to a specified format
-// Can add wrappers for Number literals etc on this
-export function timeFormatLiteral(func: (...args: any[]) => any) {
+/** The function is a wrapper for literal methods to format & convert different datatypes to 
+ * string types for literal usage. Currently formats:
+ *      Luxon DateTime object to string with formatTime formatter
+*/
+export function literalWrapper(func: (...args: any[]) => any) {
     return function(...args: any[]) {
         for (const i in args) { 
             let arg=args[i];
@@ -33,7 +35,6 @@ interface EmailLiterals {
     readonly greeting: (name: string) => string,
     readonly subject: (type?:string, a?: string, success?: boolean, t?: DateTime) => string,
     readonly body: (params: Partial<BodyParams>) => string[],
-    readonly footer: string,
 }
 
 interface Literals {
@@ -45,9 +46,8 @@ interface Literals {
 
 const defaultLiterals: EmailLiterals = {
     greeting : (name: string) => `Hi ${name}`,
-    subject: timeFormatLiteral(lit.emailSubject),
+    subject: literalWrapper(lit.emailSubject),
     body: () => [],
-    footer: ``,
 };
 
 const summaryLiteral: EmailLiterals = {
@@ -58,36 +58,36 @@ const summaryLiteral: EmailLiterals = {
 
 const refundBeyondLiteral: EmailLiterals = {
     ...defaultLiterals,
-    body: timeFormatLiteral(lit.refBeyondBody),
+    body: literalWrapper(lit.refBeyondBody),
 }
 const refundUnusedLiteral: EmailLiterals = {
     ...defaultLiterals,
-    body: timeFormatLiteral(lit.refUnusedBody),
+    body: literalWrapper(lit.refUnusedBody),
 }
 const refundReceiveLiteral: EmailLiterals = {
     ...defaultLiterals,
-    body: timeFormatLiteral(lit.refRecBody),
+    body: literalWrapper(lit.refRecBody),
 }
 const refundApproveLiteral: EmailLiterals = {
     ...defaultLiterals,
-    body: timeFormatLiteral(lit.refAppBody),
+    body: literalWrapper(lit.refAppBody),
 }
 
 const requestBeyondLiteral: EmailLiterals = {
     ...defaultLiterals,
-    body: timeFormatLiteral(lit.reqBeyondBody),
+    body: literalWrapper(lit.reqBeyondBody),
 }
 const requestUnusedLiteral: EmailLiterals = {
     ...defaultLiterals,
-    body: timeFormatLiteral(lit.reqUnusedBody),
+    body: literalWrapper(lit.reqUnusedBody),
 }
 const requestGlobalLiteral: EmailLiterals = {
     ...defaultLiterals,
-    body: timeFormatLiteral(lit.reqGloBody),
+    body: literalWrapper(lit.reqGloBody),
 }
 const requestApproveLiteral: EmailLiterals = {
     ...defaultLiterals,
-    body: timeFormatLiteral(lit.reqAppBody),
+    body: literalWrapper(lit.reqAppBody),
 }
 
 
