@@ -2,6 +2,7 @@ import config from "../config/config";
 import { fromISO as newTime, addDays, format as formatTime } from "./time";
 import * as sheet from "./sheet";
 import * as form from "./form";
+import literal from "../literals/literalTypes";
 
 type Response = {
   review?: boolean;
@@ -50,16 +51,12 @@ function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
 
   const used = entry.days[assignment].used;
   const free = entry.days[assignment].free;
-  const freeDaysMessage =
-    free > 0
-      ? [`You also received ${free} free late day(s) for ${assignment}.`]
-      : [];
 
   switch (request.action.act) {
     case "summary":
       return {
-        subject: `Late day summary`,
-        body: [],
+        subject: literal.summary.subject(), // `Late day summary`,
+        body: literal.summary.body({}),
       };
 
     case "refund": {
@@ -72,36 +69,24 @@ function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
       switch (true) {
         case request.time > addDays(deadline, config.policy.refundPeriodInDays):
           return {
-            subject: `Late day refund request for ${assignment} rejected`,
-            body: [
-              `It is too late to request the refund for ${assignment}.`,
-              `The request should have been made by ${formatTime(
-                addDays(deadline, config.policy.refundPeriodInDays)
-              )}.`,
-              `Please check the rules in the syllabus.`,
-            ],
+            subject: literal.refund.beyond.subject(assignment),
+            body: literal.refund.beyond.body({
+              assignment: assignment,
+              oldDeadline: addDays(deadline, config.policy.refundPeriodInDays)
+            })
           };
 
         case used === 0:
           return {
-            subject: `Late day refund request for ${assignment} rejected`,
-            body: [
-              `You didn't use any late days for ${assignment}.`,
-              `The original deadline for ${assignment} is ${formatTime(
-                deadline
-              )}.`,
-            ],
+            subject: literal.refund.unused.subject(assignment),
+            body: literal.refund.unused.body({assignment: assignment, oldDeadline: deadline}),
           };
 
         case request.time > newDeadlineWithoutFreeDays:
           return {
             review: true,
-            subject: `Late day refund request for ${assignment} received`,
-            body: [
-              `You requested a refund of ${request.action.days} late day(s).`,
-              `It will take some time for us to review your refund request.`,
-              `Reply-all (not just reply) to this email if nothing happens in a week.`,
-            ],
+            subject: literal.refund.received.subject(assignment),
+            body: literal.refund.received.body({numOfDays: request.action.days}),
           };
 
         default: {
@@ -111,20 +96,14 @@ function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
             Math.max(0, used - request.action.days) + free
           );
           return {
-            subject: `Late day request for ${assignment} approved: new deadline ${formatTime(
-              newDeadline
-            )}`,
-            body: [
-              `This is a confirmation that you got ${Math.min(
-                used,
-                request.action.days
-              )} late day(s) refunded for ${assignment}.`,
-              ...freeDaysMessage,
-              `The original deadline for ${assignment} is ${formatTime(
-                deadline
-              )}.`,
-              `The new deadline is ${formatTime(newDeadline)}.`,
-            ],
+            subject: literal.refund.approved.subject(assignment, formatTime(newDeadline)),
+            body: literal.refund.approved.body({
+              assignment: assignment,
+              numOfDays: Math.min(used,request.action.days),
+              oldDeadline: deadline,
+              newDeadline: newDeadline,
+              freeDays: free,
+            }),
           };
         }
       }
@@ -135,56 +114,44 @@ function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
         case request.time >
           addDays(deadline, config.policy.requestPeriodInDays):
           return {
-            subject: `Late day request rejected`,
-            body: [
-              `It is too late to request late days for ${assignment}.`,
-              `The request should have been made by ${formatTime(
-                addDays(deadline, config.policy.requestPeriodInDays)
-              )}.`,
-              `Please check the rules in the syllabus.`,
-            ],
+            subject: literal.request.beyond.subject(assignment),
+            body: literal.request.beyond.body({
+              assignment: assignment,
+              oldDeadline: addDays(deadline, config.policy.requestPeriodInDays),
+            }),
           };
 
         case request.action.days < used:
           return {
-            subject: `Late day request for ${assignment} rejected`,
-            body: [
-              `You've already spent ${used} late day(s), so you cannot request fewer late day(s).`,
-              `For refund, please choose the refund options.`,
-            ],
+            subject: literal.request.unused.subject(assignment),
+            body: literal.request.unused.body({numOfDays: used}),
           };
 
         case request.action.days - used > remaining:
           return {
-            subject: `Late day request for ${assignment} rejected`,
-            body: [
-              `You cannot request ${request.action.days} late day(s) for ${assignment}, because you only have ${remaining} late day(s) available.`,
-            ],
+            subject: literal.request.global.subject(assignment),
+            body: literal.request.global.body({assignment: assignment, numOfDays: request.action.days, leftDays: remaining}),
           };
 
         default: {
           entry.days[assignment].used = request.action.days;
           const newDeadline = addDays(deadline, request.action.days + free);
           return {
-            subject: `Late day request for ${assignment} approved: new deadline ${formatTime(
-              newDeadline
-            )}`,
-            body: [
-              `This is a confirmation that you spent ${request.action.days} day(s) for ${assignment}.`,
-              ...freeDaysMessage,
-              `The original deadline for ${assignment} is ${formatTime(
-                deadline
-              )}.`,
-              `The new deadline for ${assignment} is ${formatTime(
-                newDeadline
-              )}.`,
-            ],
+            subject: literal.request.approved.subject(assignment, formatTime(newDeadline)),
+            body: literal.request.approved.body({
+              assignment: assignment,
+              numOfDays: request.action.days,
+              oldDeadline: deadline,
+              newDeadline: newDeadline,
+              freeDays: free,
+            }),
           };
         }
       }
     }
   }
 }
+
 
 function sendEmail(req: form.Request, res: Response, footer: string[]): void {
   const subject = config.email.subjectPrefix
