@@ -1,0 +1,12 @@
+overwrite: true
+schema:
+  - "https://canvas.umn.edu/api/graphql":
+      headers:
+        'Authorization': 'Bearer 4356~RYOrSjtXYD0wHnPcZJSob4IRg7thFYRKiaoy1FYoJ5iD0lbxz5RTMiulxApPvzOn' # Replace with auth token
+generates:
+  src/canvas/queryTypes.ts:
+    documents: src/canvas/queries.ts
+    plugins:
+      - typescript-operations
+    config:
+      typesSuffix: 'Type'

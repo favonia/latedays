@@ -7,7 +7,8 @@
     "test": "mocha -- --require ts-node/register test/**.ts",
     "build": "webpack",
     "clasp": "mkdir -p dist && cd dist && clasp",
-    "deploy": "mkdir -p dist && cd dist && clasp push -f"
+    "deploy": "mkdir -p dist && cd dist && clasp push -f",
+    "graphql-codegen": "npx graphql-codegen --config src/canvas/codegen.yml"
   },
   "repository": {
     "type": "git",
@@ -21,6 +22,8 @@
   "homepage": "https://github.com/favonia/latedays#readme",
   "devDependencies": {
     "@google/clasp": "^2.4.2",
+    "@graphql-codegen/cli": "^2.13.7",
+    "@graphql-codegen/typescript-operations": "^2.5.5",
     "@types/luxon": "^3.0.1",
     "@types/mocha": "^10.0.0",
     "@types/webpack": "^5.28.0",
