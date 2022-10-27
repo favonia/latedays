@@ -1,5 +1,5 @@
 import config from "../config/config";
-import { fromISO as newTime, addDays, format as formatTime } from "./time";
+import { fromISO as newTime, addDays } from "./time";
 import * as sheet from "./sheet";
 import * as form from "./form";
 import literal from "../literals/literalTypes";
