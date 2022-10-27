@@ -72,21 +72,26 @@ function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
             subject: literal.refund.beyond.subject(assignment),
             body: literal.refund.beyond.body({
               assignment: assignment,
-              oldDeadline: addDays(deadline, config.policy.refundPeriodInDays)
-            })
+              oldDeadline: addDays(deadline, config.policy.refundPeriodInDays),
+            }),
           };
 
         case used === 0:
           return {
             subject: literal.refund.unused.subject(assignment),
-            body: literal.refund.unused.body({assignment: assignment, oldDeadline: deadline}),
+            body: literal.refund.unused.body({
+              assignment: assignment,
+              oldDeadline: deadline,
+            }),
           };
 
         case request.time > newDeadlineWithoutFreeDays:
           return {
             review: true,
             subject: literal.refund.received.subject(assignment),
-            body: literal.refund.received.body({numOfDays: request.action.days}),
+            body: literal.refund.received.body({
+              numOfDays: request.action.days,
+            }),
           };
 
         default: {
@@ -96,10 +101,13 @@ function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
             Math.max(0, used - request.action.days) + free
           );
           return {
-            subject: literal.refund.approved.subject(assignment, formatTime(newDeadline)),
+            subject: literal.refund.approved.subject(
+              assignment,
+              formatTime(newDeadline)
+            ),
             body: literal.refund.approved.body({
               assignment: assignment,
-              numOfDays: Math.min(used,request.action.days),
+              numOfDays: Math.min(used, request.action.days),
               oldDeadline: deadline,
               newDeadline: newDeadline,
               freeDays: free,
@@ -124,20 +132,27 @@ function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
         case request.action.days < used:
           return {
             subject: literal.request.unused.subject(assignment),
-            body: literal.request.unused.body({numOfDays: used}),
+            body: literal.request.unused.body({ numOfDays: used }),
           };
 
         case request.action.days - used > remaining:
           return {
             subject: literal.request.global.subject(assignment),
-            body: literal.request.global.body({assignment: assignment, numOfDays: request.action.days, leftDays: remaining}),
+            body: literal.request.global.body({
+              assignment: assignment,
+              numOfDays: request.action.days,
+              leftDays: remaining,
+            }),
           };
 
         default: {
           entry.days[assignment].used = request.action.days;
           const newDeadline = addDays(deadline, request.action.days + free);
           return {
-            subject: literal.request.approved.subject(assignment, formatTime(newDeadline)),
+            subject: literal.request.approved.subject(
+              assignment,
+              formatTime(newDeadline)
+            ),
             body: literal.request.approved.body({
               assignment: assignment,
               numOfDays: request.action.days,
@@ -151,7 +166,6 @@ function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
     }
   }
 }
-
 
 function sendEmail(req: form.Request, res: Response, footer: string[]): void {
   const subject = config.email.subjectPrefix
