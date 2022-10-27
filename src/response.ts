@@ -103,7 +103,7 @@ function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
           return {
             subject: literal.refund.approved.subject(
               assignment,
-              formatTime(newDeadline)
+              newDeadline
             ),
             body: literal.refund.approved.body({
               assignment: assignment,
@@ -151,7 +151,7 @@ function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
           return {
             subject: literal.request.approved.subject(
               assignment,
-              formatTime(newDeadline)
+              newDeadline
             ),
             body: literal.request.approved.body({
               assignment: assignment,

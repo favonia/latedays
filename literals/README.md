@@ -1,5 +1,6 @@
 ## Literals
-The directory contains all the literals that are used in emails sent out. The `LiteralType` contains a type with `subject`, `body` and `greeting` (optional) as needed for all the emails. All the `literal` Objects defined to handle the different possible responses are as listed below.
+The directory contains all the literals and their handlers that are used in the emails sent out. All the literal objects defined are ultimately of type `EmailLiterals`, which contains the properties `subject`, `body` and `greeting`, as needed for all the emails. The untyped exported `literal` object puts together all the initialized literals. 
+All the literals defined are as listed below.
 - __Summary Literal__ : Handles summary requests
 - __Refund Literal__ : Handles free day refund requests
     - _beyond_: refund requested date > possible policy date

@@ -36,24 +36,15 @@ export function literalWrapper(func: (...args: any[]) => any) {
 interface EmailLiterals {
   readonly greeting: (name: string) => string;
   readonly subject: (
-    type?: string,
     a?: string,
-    success?: boolean,
     t?: DateTime
   ) => string;
   readonly body: (params: Partial<BodyParams>) => string[];
 }
 
-interface Literals {
-  default: EmailLiterals;
-  summary: EmailLiterals;
-  refund: Record<"beyond" | "unused" | "received" | "approved", EmailLiterals>;
-  request: Record<"beyond" | "unused" | "global" | "approved", EmailLiterals>;
-}
-
 const defaultLiterals: EmailLiterals = {
   greeting: (name: string) => `Hi ${name}`,
-  subject: literalWrapper(lit.emailSubject),
+  subject: () => ``,
   body: () => [],
 };
 
@@ -64,39 +55,47 @@ const summaryLiteral: EmailLiterals = {
 
 const refundBeyondLiteral: EmailLiterals = {
   ...defaultLiterals,
+  subject: literalWrapper(lit.refundRejSubject),
   body: literalWrapper(lit.refBeyondBody),
 };
 const refundUnusedLiteral: EmailLiterals = {
   ...defaultLiterals,
+  subject: literalWrapper(lit.refundRejSubject),
   body: literalWrapper(lit.refUnusedBody),
 };
 const refundReceiveLiteral: EmailLiterals = {
   ...defaultLiterals,
+  subject: literalWrapper(lit.refundRecSubject),
   body: literalWrapper(lit.refRecBody),
 };
 const refundApproveLiteral: EmailLiterals = {
   ...defaultLiterals,
+  subject: literalWrapper(lit.refundAppSubject),
   body: literalWrapper(lit.refAppBody),
 };
 
 const requestBeyondLiteral: EmailLiterals = {
   ...defaultLiterals,
+  subject: literalWrapper(lit.requestRejSubject),
   body: literalWrapper(lit.reqBeyondBody),
 };
 const requestUnusedLiteral: EmailLiterals = {
   ...defaultLiterals,
+  subject: literalWrapper(lit.requestRejSubject),
   body: literalWrapper(lit.reqUnusedBody),
 };
 const requestGlobalLiteral: EmailLiterals = {
   ...defaultLiterals,
+  subject: literalWrapper(lit.requestRejSubject),
   body: literalWrapper(lit.reqGloBody),
 };
 const requestApproveLiteral: EmailLiterals = {
   ...defaultLiterals,
+  subject: literalWrapper(lit.requestAppSubject),
   body: literalWrapper(lit.reqAppBody),
 };
 
-const literal: Literals = {
+const literal = {
   default: defaultLiterals,
   summary: summaryLiteral,
   refund: {
