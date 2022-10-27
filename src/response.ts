@@ -101,10 +101,7 @@ function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
             Math.max(0, used - request.action.days) + free
           );
           return {
-            subject: literal.refund.approved.subject(
-              assignment,
-              newDeadline
-            ),
+            subject: literal.refund.approved.subject(assignment, newDeadline),
             body: literal.refund.approved.body({
               assignment: assignment,
               numOfDays: Math.min(used, request.action.days),
@@ -149,10 +146,7 @@ function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
           entry.days[assignment].used = request.action.days;
           const newDeadline = addDays(deadline, request.action.days + free);
           return {
-            subject: literal.request.approved.subject(
-              assignment,
-              newDeadline
-            ),
+            subject: literal.request.approved.subject(assignment, newDeadline),
             body: literal.request.approved.body({
               assignment: assignment,
               numOfDays: request.action.days,

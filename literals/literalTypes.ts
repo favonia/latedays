@@ -35,10 +35,7 @@ export function literalWrapper(func: (...args: any[]) => any) {
 
 interface EmailLiterals {
   readonly greeting: (name: string) => string;
-  readonly subject: (
-    a?: string,
-    t?: DateTime
-  ) => string;
+  readonly subject: (a?: string, t?: DateTime) => string;
   readonly body: (params: Partial<BodyParams>) => string[];
 }
 
