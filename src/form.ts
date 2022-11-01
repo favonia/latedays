@@ -131,7 +131,7 @@ export function init(): void {
  * and do not contain unusual characters such as "@". (RFCs allowed many
  * more email addresses that could not be handled by this function.)
  */
-function idOfEmail(email: string): string {
+export function idOfEmail(email: string): string {
   return email.match(/^([^@]*)@/)![1];
 }
 

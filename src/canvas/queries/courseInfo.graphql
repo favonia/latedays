@@ -1,0 +1,12 @@
+query courseInfo($courseId: ID!, $studentIds: [ID!]) {
+  course(id: $courseId) {
+    submissionsConnection(studentIds: $studentIds) {
+      nodes {
+        submittedAt
+        assignment {
+          name
+        }
+      }
+    }
+  }
+}

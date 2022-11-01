@@ -1,0 +1,14 @@
+query studInfo($courseId: ID!) {
+  course(id: $courseId) {
+    name
+    usersConnection {
+      nodes {
+        _id
+        email
+        loginId
+        name
+        sisId
+      }
+    }
+  }
+}

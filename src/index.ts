@@ -1,6 +1,6 @@
 import * as form from "./form";
 import * as sheet from "./sheet";
-import * as time from "./time";
+import * as canvasSheet from "./canvas/sheet";
 import * as response from "./response";
 
 function withLock(f: (...args: any[]) => void): (...args: any[]) => void {
@@ -37,3 +37,6 @@ global.regenerateForm = withLock(regenerateForm);
 
 // @ts-ignore: global
 global.callbackOnFormSubmit = withLock(response.handle);
+
+// @ts-ignore: global
+global.fetchRoster = withLock(canvasSheet.fetchRoster);

@@ -6,7 +6,7 @@ const propDataSheetId = "SHEET_ID";
 
 let cachedSheet: GoogleAppsScript.Spreadsheet.Sheet | null = null;
 
-const idHeader = "ID";
+export const idHeader = "ID";
 const usedHeader = (title: string): string => `Used ${title}`;
 const freeHeader = (title: string): string => `Free ${title}`;
 
@@ -22,7 +22,7 @@ const expectedHeaders = [
 type IndexOfHeader = Record<string, number>;
 let cachedIndexOfHeader: IndexOfHeader | null = null;
 
-function ensureHeaders(ds: GoogleAppsScript.Spreadsheet.Sheet): IndexOfHeader {
+function ensureHeaders(ds: GoogleAppsScript.Spreadsheet.Sheet, headersList: string[]): IndexOfHeader {
   if (cachedIndexOfHeader !== null) {
     return cachedIndexOfHeader;
   }
@@ -35,7 +35,7 @@ function ensureHeaders(ds: GoogleAppsScript.Spreadsheet.Sheet): IndexOfHeader {
   } catch {}
 
   // add all missing headers
-  expectedHeaders.forEach(function (item: string): void {
+  headersList.forEach(function (item: string): void {
     if (lookup[item] === undefined) {
       lookup[item] = headers.length;
       headers.push(item);
@@ -47,16 +47,18 @@ function ensureHeaders(ds: GoogleAppsScript.Spreadsheet.Sheet): IndexOfHeader {
   return (cachedIndexOfHeader = lookup);
 }
 
-function initDataSheet(
-  ds: GoogleAppsScript.Spreadsheet.Sheet
+export function initDataSheet(
+  ds: GoogleAppsScript.Spreadsheet.Sheet,
+  sheetName: string,
+  headersList: string[],
 ): GoogleAppsScript.Spreadsheet.Sheet {
   try {
     // This could fail if there's already another sheet with the same name.
     // Not that we really care...
-    ds.setName(config.sheet.dataSheetName);
+    ds.setName(sheetName);
   } catch {}
 
-  const headers = ensureHeaders(ds);
+  const headers = ensureHeaders(ds, headersList);
 
   ds.setFrozenRows(1);
   ds.setFrozenColumns(headers[idHeader] + 1);
@@ -93,13 +95,13 @@ export function ensure(): GoogleAppsScript.Spreadsheet.Sheet {
   let ds: GoogleAppsScript.Spreadsheet.Sheet | undefined;
   if (dsId === null) {
     ds = ss.getSheets()[0];
-    initDataSheet(ds);
+    initDataSheet(ds, config.sheet.dataSheetName, expectedHeaders);
   } else {
     // for whatever reasons, there's no "getSheetById"
     ds = ss.getSheets().find((sheet) => sheet.getSheetId() === Number(dsId));
     if (ds === undefined) {
       ds = ss.insertSheet();
-      initDataSheet(ds);
+      initDataSheet(ds, config.sheet.dataSheetName, expectedHeaders);
     } else {
       return (cachedSheet = ds);
     }
@@ -133,7 +135,7 @@ export function readRecord(
   ds: GoogleAppsScript.Spreadsheet.Sheet,
   id: string
 ): Entry {
-  const headers = ensureHeaders(ds);
+  const headers = ensureHeaders(ds, expectedHeaders);
 
   let values: any[][] = [];
   try {
@@ -174,7 +176,7 @@ export function updateRecord(
   ds: GoogleAppsScript.Spreadsheet.Sheet,
   entry: Entry
 ): void {
-  const headers = ensureHeaders(ds);
+  const headers = ensureHeaders(ds, expectedHeaders);
 
   const range = ds.getRange(1 + entry.rowIndex + 1, 1, 1, ds.getLastColumn());
   let row: any[] = range.getValues()[0];
