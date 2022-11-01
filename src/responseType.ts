@@ -2,7 +2,7 @@ import { Assignment } from "../config/config";
 import { fromISO as newTime, addDays, Time } from "./time";
 import * as sheet from "./sheet";
 import * as form from "./form";
-import config, { isAssignment } from "../config/config";
+import config from "../config/config";
 import literal from "../literals/literalTypes";
 
 type UpdateSummary = {
@@ -31,9 +31,10 @@ function formatSummary(entry: sheet.Entry): UpdateSummary {
     usage: [],
   };
   Object.entries(entry.days).forEach(([assign, days]) => {
-    if ((days.used + days.free > 0) && isAssignment(assign)) {
+    if ((days.used + days.free > 0)) {
       latedays.usage.push({
-        assignment: assign,
+        // Type asserting; doesn't validate on assignment values
+        assignment: assign as Assignment,
         free: days.free,
         used: days.used
       });
