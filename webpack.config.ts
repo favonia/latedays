@@ -17,10 +17,18 @@ const config: webpack.Configuration = {
         use: "ts-loader",
         exclude: /node_modules/,
       },
+      {
+        enforce: 'pre',
+        test: /\.html$/,
+        loader: 'raw-loader',
+      },
     ],
   },
   resolve: {
     extensions: [".ts", ".js"],
+    alias: {
+      handlebars: 'handlebars/dist/handlebars.min.js'
+   }
   },
   plugins: [
     new gas(),
