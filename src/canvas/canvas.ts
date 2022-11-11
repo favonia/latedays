@@ -51,19 +51,14 @@ export function fetchAndWriteUsers(sheet: GoogleAppsScript.Spreadsheet.Sheet) {
     },
     payload: JSON.stringify({query : studentInfoQuery, variables: {courseId: courseId}}),
   })
-
-  try {
-    const data : queryTypes.StudInfoQueryType = JSON.parse(graphQLClient.getContentText()).data
-    var roster = data.course?.usersConnection?.nodes || []
-    var values = []
-    for (var user of roster) {
-      if (user != undefined) {
-        values.push([idOfEmail(user.loginId || ''), user.email, user._id, user.name])
-      }
+  const data : queryTypes.StudInfoQueryType = JSON.parse(graphQLClient.getContentText()).data
+  var roster = data.course?.usersConnection?.nodes || []
+  var values = []
+  for (var user of roster) {
+    if (user != undefined) {
+      values.push([idOfEmail(user.loginId || ''), user.email, user._id, user.name])
     }
-    sheet.getRange(2, 1, values.length, values[0].length).setValues(values)
-    console.log("Roster sheet updated.")
-  } catch (error) {
-    console.log(error)
-  } 
+  }
+  sheet.getRange(2, 1, values.length, values[0].length).setValues(values)
+  console.log("Roster sheet updated.")
 }

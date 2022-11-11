@@ -18,7 +18,7 @@ export interface ActionSummary {
 
 export type Action = ActionRefund | ActionRequest | ActionSummary;
 
-export type AssignmentInfo = { deadline: string };
+export type AssignmentInfo = { deadline: string, canvasEnabled: boolean };
 
 export type Assignments<Assignment extends string> = Readonly<
   Record<Assignment, AssignmentInfo>

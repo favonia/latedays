@@ -11,8 +11,8 @@ export const config: Config<Assignment> = {
   // A map from assignment IDs to assignment information.
   // Currently, the only information is its deadline.
   assignments: {
-    "Homework 1": { deadline: "2021-08-29T17:00:00-06:00" },
-    "Homework 2": { deadline: "2021-08-30T17:00:00-06:00" },
+    "Homework 1": { deadline: "2021-08-29T17:00:00-06:00", canvasEnabled: false },
+    "Homework 2": { deadline: "2021-08-30T17:00:00-06:00", canvasEnabled: false },
   },
   policy: {
     // The maximum number of late days a student can use.

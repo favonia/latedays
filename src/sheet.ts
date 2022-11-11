@@ -7,10 +7,10 @@ const propDataSheetId = "SHEET_ID";
 let cachedSheet: GoogleAppsScript.Spreadsheet.Sheet | null = null;
 
 export const idHeader = "ID";
-const usedHeader = (title: string): string => `Used ${title}`;
-const freeHeader = (title: string): string => `Free ${title}`;
+export const usedHeader = (title: string): string => `Used ${title}`;
+export const freeHeader = (title: string): string => `Free ${title}`;
 
-const expectedHeaders = [
+export const expectedHeaders = [
   idHeader,
   ...Object.keys(config.assignments).flatMap((assign) => [
     usedHeader(assign),
@@ -22,7 +22,7 @@ const expectedHeaders = [
 type IndexOfHeader = Record<string, number>;
 let cachedIndexOfHeader: IndexOfHeader | null = null;
 
-function ensureHeaders(ds: GoogleAppsScript.Spreadsheet.Sheet, headersList: string[]): IndexOfHeader {
+export function ensureHeaders(ds: GoogleAppsScript.Spreadsheet.Sheet, headersList: string[]): IndexOfHeader {
   if (cachedIndexOfHeader !== null) {
     return cachedIndexOfHeader;
   }
