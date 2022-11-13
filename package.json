@@ -22,7 +22,7 @@
   "devDependencies": {
     "@google/clasp": "^2.4.2",
     "@types/jest": " ^29.0.0",
-    "@types/luxon": "^3.0.1",
+    "@types/luxon": "^3.1.0",
     "@types/webpack": "^5.28.0",
     "copy-webpack-plugin": "^11.0.0",
     "gas-webpack-plugin": "^2.3.0",
@@ -31,13 +31,12 @@
     "ts-loader": "^9.4.1",
     "ts-node": "^10.9.1",
     "typescript": "^4.8.4",
-    "webpack": "^5.74.0",
+    "webpack": "^5.75.0",
     "webpack-cli": "^4.10.0"
   },
   "dependencies": {
-    "@types/google-apps-script": "^1.0.55",
-    "ci": "^2.2.0",
+    "@types/google-apps-script": "^1.0.56",
     "handlebars": "^4.7.7",
-    "luxon": "^3.0.4"
+    "luxon": "^3.1.0"
   }
 }

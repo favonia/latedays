@@ -2,27 +2,27 @@ import { Assignment } from "../config/config";
 import { fromISO as newTime, addDays, Time } from "./time";
 import * as sheet from "./sheet";
 import * as form from "./form";
-import config, { isAssignment } from "../config/config";
-import literal from "../config/literalTypes";
+import config from "../config/config";
+import literal from "../literals/literalTypes";
 
 type UpdateSummary = {
-  remainingDays: number,
-  comments?: string[],
+  remainingDays: number;
+  comments?: string[];
   usage: Array<{
-    assignment: Assignment,
-    free: number,
-    used: number,
-  }>,
+    assignment: Assignment;
+    free: number;
+    used: number;
+  }>;
 };
 
 export type Response = {
-  assignment : Assignment,
-  success?: boolean,
-  review?: boolean,
-  state: Partial<Record<"old" | "new", {deadline: Time, used: number}>>,
-  updateSummary: UpdateSummary,
-  freeDays?: string[],
-  comments?: string[],
+  assignment: Assignment;
+  success?: boolean;
+  review?: boolean;
+  state: Partial<Record<"old" | "new", { deadline: Time; used: number }>>;
+  updateSummary: UpdateSummary;
+  freeDays?: string[];
+  comments?: string[];
 };
 
 function formatSummary(entry: sheet.Entry): UpdateSummary {
@@ -31,11 +31,12 @@ function formatSummary(entry: sheet.Entry): UpdateSummary {
     usage: [],
   };
   Object.entries(entry.days).forEach(([assign, days]) => {
-    if ((days.used + days.free > 0) && isAssignment(assign)) {
+    if (days.used + days.free > 0) {
       latedays.usage.push({
-        assignment: assign,
+        // Type asserting; doesn't validate on assignment values
+        assignment: assign as Assignment,
         free: days.free,
-        used: days.used
+        used: days.used,
       });
     }
   });
@@ -49,7 +50,10 @@ function formatSummary(entry: sheet.Entry): UpdateSummary {
   return latedays;
 }
 
-export function updateAndRespond(entry: sheet.Entry, request: form.Request): Response {
+export function updateAndRespond(
+  entry: sheet.Entry,
+  request: form.Request
+): Response {
   const assignment = request.assignment;
   const deadline = newTime(config.assignments[assignment].deadline);
 
@@ -61,10 +65,10 @@ export function updateAndRespond(entry: sheet.Entry, request: form.Request): Res
 
   const used = entry.days[assignment].used;
   const free = entry.days[assignment].free;
-  let resp : Response = {
+  let resp: Response = {
     assignment: assignment,
     state: {
-      "old": {deadline: deadline, used: used},
+      old: { deadline: deadline, used: used },
     },
   } as Response;
 
@@ -82,24 +86,29 @@ export function updateAndRespond(entry: sheet.Entry, request: form.Request): Res
 
       switch (true) {
         case request.time > addDays(deadline, config.policy.refundPeriodInDays):
-          resp.success= false;
-          resp.comments= literal.refund.beyond.body({
+          resp.success = false;
+          resp.comments = literal.refund.beyond.body({
             assignment: assignment,
-            oldDeadline: addDays(deadline, config.policy.refundPeriodInDays)
-          })
+            oldDeadline: addDays(deadline, config.policy.refundPeriodInDays),
+          });
           break;
 
         case used === 0:
-          resp.success= false;
-          resp.comments= literal.refund.unused.body({assignment: assignment, oldDeadline: deadline});
+          resp.success = false;
+          resp.comments = literal.refund.unused.body({
+            assignment: assignment,
+            oldDeadline: deadline,
+          });
           break;
 
         case request.time > newDeadlineWithoutFreeDays:
-          resp.comments= literal.refund.received.body({numOfDays: request.action.days});
+          resp.comments = literal.refund.received.body({
+            numOfDays: request.action.days,
+          });
           break;
 
         default: {
-          resp.success= true;
+          resp.success = true;
           entry.days[assignment].used = Math.max(0, used - request.action.days);
           const newDeadline = addDays(
             deadline,
@@ -107,11 +116,11 @@ export function updateAndRespond(entry: sheet.Entry, request: form.Request): Res
           );
           resp.state.new = {
             deadline: newDeadline,
-            used: entry.days[assignment].used
+            used: entry.days[assignment].used,
           };
-          resp.comments= literal.refund.approved.body({
+          resp.comments = literal.refund.approved.body({
             assignment: assignment,
-            numOfDays: Math.min(used,request.action.days),
+            numOfDays: Math.min(used, request.action.days),
             oldDeadline: deadline,
             newDeadline: newDeadline,
             freeDays: free,
@@ -125,34 +134,34 @@ export function updateAndRespond(entry: sheet.Entry, request: form.Request): Res
       switch (true) {
         case request.time >
           addDays(deadline, config.policy.requestPeriodInDays):
-          resp.success= false;
-          resp.comments= literal.request.beyond.body({
+          resp.success = false;
+          resp.comments = literal.request.beyond.body({
             assignment: assignment,
             oldDeadline: addDays(deadline, config.policy.requestPeriodInDays),
           });
           break;
 
         case request.action.days < used:
-          resp.success= false;
-          resp.comments= literal.request.unused.body({numOfDays: used});
+          resp.success = false;
+          resp.comments = literal.request.unused.body({ numOfDays: used });
           break;
 
         case request.action.days - used > remaining:
-          resp.success= false;
-          resp.comments= literal.request.global.body({
-            assignment: assignment, 
+          resp.success = false;
+          resp.comments = literal.request.global.body({
+            assignment: assignment,
             numOfDays: request.action.days,
-            leftDays: remaining
+            leftDays: remaining,
           });
           break;
 
         default: {
           entry.days[assignment].used = request.action.days;
           const newDeadline = addDays(deadline, request.action.days + free);
-          resp.success= true;
+          resp.success = true;
           resp.state.new = {
             deadline: newDeadline,
-            used: entry.days[assignment].used
+            used: entry.days[assignment].used,
           };
           resp.comments = literal.request.approved.body({
             assignment: assignment,
@@ -166,7 +175,8 @@ export function updateAndRespond(entry: sheet.Entry, request: form.Request): Res
       }
     }
 
-    default: {}
+    default: {
+    }
   }
   resp.updateSummary = formatSummary(entry);
   return resp;

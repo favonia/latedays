@@ -7,8 +7,8 @@ import { Request } from "../src/form";
 import { Entry } from "../src/sheet";
 import { DateTime } from "luxon";
 import { Assignment } from "../config/config";
-import { addDays, format as formatTime } from "../src/time";
-import * as literal from "../config/literals";
+import { addDays } from "../src/time";
+import * as literal from "../literals/literals";
 
 let defaultAssignment = "Test HW" as jest.Mocked<Assignment>;
 
@@ -38,7 +38,7 @@ jest.mock("../config/config", () => {
 });
 
 import config from "../config/config";
-import { timeFormatLiteral } from "../config/literalTypes";
+import { literalWrapper } from "../literals/literalTypes";
 
 const testRequest : Request = {
   id: "",
@@ -79,7 +79,7 @@ describe("testing Responses", () => {
       expect(
         updateAndRespond(testEntry, refundRequest).comments
       ).toStrictEqual(
-        timeFormatLiteral(literal.refBeyondBody)({
+        literalWrapper(literal.refBeyondBody)({
           assignment: defaultAssignment, 
           oldDeadline: addDays(
             DateTime.fromISO(config.assignments[defaultAssignment].deadline),
@@ -106,7 +106,7 @@ describe("testing Responses", () => {
       expect(
         updateAndRespond(refundEntry, refundRequest).comments
       ).toStrictEqual(
-        timeFormatLiteral(literal.refUnusedBody)({
+        literalWrapper(literal.refUnusedBody)({
           assignment: defaultAssignment, 
           oldDeadline: DateTime.fromISO(config.assignments[defaultAssignment].deadline),
         })
@@ -160,7 +160,7 @@ describe("testing Responses", () => {
       expect(
         updateAndRespond(testEntry, reqRequest).comments
       ).toStrictEqual(
-        timeFormatLiteral(literal.reqBeyondBody)({
+        literalWrapper(literal.reqBeyondBody)({
           assignment: defaultAssignment, 
           oldDeadline: DateTime.fromISO("2022-02-05T17:00:00-06:00")}),
       );
