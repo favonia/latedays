@@ -19,6 +19,11 @@ const config: webpack.Configuration = {
       },
       {
         enforce: 'pre',
+        test: /\.html$/,
+        loader: 'raw-loader',
+      },
+      {
+        enforce: 'pre',
         test: /\.graphql$/,
         loader: 'raw-loader',
       },
@@ -26,6 +31,9 @@ const config: webpack.Configuration = {
   },
   resolve: {
     extensions: [".ts", ".js"],
+    alias: {
+      handlebars: 'handlebars/dist/handlebars.min.js'
+   }
   },
   plugins: [
     new gas(),
