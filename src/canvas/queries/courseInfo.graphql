@@ -6,6 +6,9 @@ query courseInfo($courseId: ID!, $studentIds: [ID!]) {
         assignment {
           name
         }
+        user {
+          _id
+        }
       }
     }
   }
