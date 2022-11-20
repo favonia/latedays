@@ -18,17 +18,17 @@ const config: webpack.Configuration = {
         exclude: /node_modules/,
       },
       {
-        enforce: 'pre',
+        enforce: "pre",
         test: /\.html$/,
-        loader: 'raw-loader',
+        loader: "raw-loader",
       },
     ],
   },
   resolve: {
     extensions: [".ts", ".js"],
     alias: {
-      handlebars: 'handlebars/dist/handlebars.min.js'
-   }
+      handlebars: "handlebars/dist/handlebars.min.js",
+    },
   },
   plugins: [
     new gas(),
