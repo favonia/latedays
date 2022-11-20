@@ -8,7 +8,7 @@ permissions: # added using https://github.com/step-security/secure-workflows
 
 jobs:
   test:
-    name: Build
+    name: prettier
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner
@@ -20,8 +20,4 @@ jobs:
       - uses: actions/setup-node@8c91899e586c5b171469028077307d293428b516
         with:
           node-version: "16"
-      - run: |
-          npm ci
-          cp config/sample.ts config/config.ts
-          npm run build
-          npm test
+      - run: npx --yes prettier@latest --check .
