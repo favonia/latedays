@@ -32,7 +32,7 @@ export function format(t: Time): string {
 }
 
 export function timeDiff(submit: string, deadline: string): number {
-  const date1 = fromISO(submit)
-  const date2 = fromISO(deadline)
-  return Interval.fromDateTimes(date1, date2).length('days')
+  const date1 = fromISO(submit);
+  const date2 = fromISO(deadline);
+  return Interval.fromDateTimes(date1, date2).length("days");
 }

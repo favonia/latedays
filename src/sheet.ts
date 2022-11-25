@@ -24,12 +24,16 @@ let cachedIndexOfHeader: IndexOfHeader | null = null;
 
 /**
  * Headers in the sheet are updated & indexed. Defaultly cached with headers for sheet 1
- * @param ds 
- * @param headersList 
+ * @param ds
+ * @param headersList
  * @param noCache Set `true` to not use cache and force fetch headers (used for sheets other than the default one)
- * @returns 
+ * @returns
  */
-export function ensureHeaders(ds: GoogleAppsScript.Spreadsheet.Sheet, headersList: string[], noCache=false): IndexOfHeader {
+export function ensureHeaders(
+  ds: GoogleAppsScript.Spreadsheet.Sheet,
+  headersList: string[],
+  noCache = false
+): IndexOfHeader {
   if (!noCache && cachedIndexOfHeader !== null) {
     return cachedIndexOfHeader;
   }
@@ -58,7 +62,7 @@ export function ensureHeaders(ds: GoogleAppsScript.Spreadsheet.Sheet, headersLis
 export function initDataSheet(
   ds: GoogleAppsScript.Spreadsheet.Sheet,
   sheetName: string,
-  headersList: string[],
+  headersList: string[]
 ): GoogleAppsScript.Spreadsheet.Sheet {
   try {
     // This could fail if there's already another sheet with the same name.

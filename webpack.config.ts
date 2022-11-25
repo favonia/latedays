@@ -23,9 +23,9 @@ const config: webpack.Configuration = {
         loader: "raw-loader",
       },
       {
-        enforce: 'pre',
+        enforce: "pre",
         test: /\.graphql$/,
-        loader: 'raw-loader',
+        loader: "raw-loader",
       },
     ],
   },
