@@ -1,19 +1,10 @@
 # Brief History
 
-The idea was originally conceived by Favonia, implemented by Zhuyang Wang, further revised by Zhuyang Wang and Favonia, and then improved by Yashveer Bika. It had been used in multiple courses taught by Favonia before it was brought to the public GitHub website. The new version on the public GitHub website was rewritten by Favonia.
+The idea was originally conceived by Favonia, implemented by Zhuyang Wang, further revised by Zhuyang Wang and Favonia, and then improved by Yashveer Bika. It had been used in multiple courses taught by Favonia before it was brought to the public GitHub website. The new version on the public GitHub website was rewritten by Favonia. Prithvi Raj Botcha later on joined the team and improve the system.
 
-# Kerno Development Team
+## Contributors to the late day system
 
-Yashveer Bika
-Sanfer D'souza
-Favonia
-Kelton O'Brien
-Nathan Utecht
-Zhuyang Wang
-Jicheng Zhu
-
-## Team members who contributed to the late day system
-
-Yashveer Bika
-Favonia
-Zhuyang Wang
+- Favonia
+- Prithvi Raj Botcha
+- Yashveer Bika
+- Zhuyang Wang

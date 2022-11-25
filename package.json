@@ -4,7 +4,7 @@
   "description": "Management of late day requests using Google Forms and Google Sheets",
   "private": true,
   "scripts": {
-    "test": "mocha -- --require ts-node/register test/**.ts",
+    "test": "jest -- test/**.ts",
     "build": "webpack",
     "clasp": "mkdir -p dist && cd dist && clasp",
     "deploy": "mkdir -p dist && cd dist && clasp push -f",
@@ -24,19 +24,19 @@
     "@google/clasp": "^2.4.2",
     "@graphql-codegen/cli": "^2.13.7",
     "@graphql-codegen/typescript-operations": "^2.5.5",
+    "@types/jest": " ^29.0.0",
     "@types/luxon": "^3.1.0",
-    "@types/mocha": "^10.0.0",
     "@types/webpack": "^5.28.0",
     "copy-webpack-plugin": "^11.0.0",
     "gas-webpack-plugin": "^2.3.0",
     "graphql": "^16.6.0",
-    "mocha": "^10.1.0",
     "raw-loader": "^4.0.2",
+    "ts-jest": "^29.0.3",
     "ts-loader": "^9.4.1",
     "ts-node": "^10.9.1",
-    "typescript": "^4.8.4",
+    "typescript": "^4.9.3",
     "webpack": "^5.75.0",
-    "webpack-cli": "^4.10.0"
+    "webpack-cli": "^5.0.0"
   },
   "dependencies": {
     "@types/google-apps-script": "^1.0.56",
