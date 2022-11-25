@@ -92,3 +92,5 @@ export const config: Config<Assignment> = {
 };
 
 export default config;
+
+export const auth_token = "~Insert token if canvas enabled~"

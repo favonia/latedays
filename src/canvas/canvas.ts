@@ -1,6 +1,4 @@
-import { Assignment, auth_token } from "../../config/config"; 
-import config from "../../config/config";
-import { timeDiff } from "../time";
+import { auth_token } from "../../config/config"; 
 import studentInfoQuery from "./queries/studentInfo.graphql";
 import courseInfoQuery from "./queries/courseInfo.graphql";
 import * as queryTypes from './queryTypes';
@@ -10,15 +8,17 @@ import { idOfEmail } from "../form";
 const endpoint = 'https://canvas.umn.edu/api/graphql'
 const courseId = '365541'
 
-// Refunds all the days if possible 
-// else the regular flow (with manual approval)
-// get studentId
-export function getSubmissions(studentIds: String[], assignment: String) {
+/**
+ * Makes the API call and fetches the submission data for a set of student Ids in an assignment
+ * @param studentIds Student Ids (Canvas Ids)
+ * @param assignment Assignment name (the same as in canvas)
+ * @returns A map of <student id, submission time> for the given assignment & students
+ */
+export function getSubmissions(studentIds: String[], assignment: String) : Map<string, string> {
   const variables = {
     courseId: courseId,
 		studentIds: studentIds,
   }
-  console.log(studentIds)
   const graphQLClient = UrlFetchApp.fetch(endpoint, {
     method: 'post',
     contentType: 'application/json',
@@ -30,19 +30,21 @@ export function getSubmissions(studentIds: String[], assignment: String) {
 
   const data : queryTypes.CourseInfoQueryType = JSON.parse(graphQLClient.getContentText()).data
 	var submissions = data.course?.submissionsConnection?.nodes
-	var difference = []
+  let returnSubmissions = new Map<string, string>()
 	for (const [k, va] of Object.entries(submissions || {})) {
-    var assignmentName = va?.assignment?.name as Assignment
-		if (assignmentName == assignment) {
-			difference.push(timeDiff(va?.submittedAt, config.assignments[assignmentName].deadline))
+    var assignmentName = va?.assignment?.name
+		if (va?.user && assignmentName == assignment && va?.submittedAt) {
+      returnSubmissions.set(va.user?._id, va.submittedAt)
 		}
 	}
-	var refund = difference.reduce((p, v) => p + v, 0)
-  console.log(refund)
+  return returnSubmissions
 }
 
+/**
+ * Makes an API call to fetch the roster for the current course and writes it to the given sheet
+ * @param sheet Roster sheet
+ */
 export function fetchAndWriteUsers(sheet: GoogleAppsScript.Spreadsheet.Sheet) {
-
   const graphQLClient = UrlFetchApp.fetch(endpoint, {
     method: 'post',
     contentType: 'application/json',
