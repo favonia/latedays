@@ -13,7 +13,6 @@ export const config: Config<Assignment> = {
   assignments: {
     "Homework 1": {
       deadline: "2021-08-29T17:00:00-06:00",
-      canvasEnabled: false,
     },
     "Homework 2": {
       deadline: "2021-08-30T17:00:00-06:00",
@@ -96,8 +95,15 @@ export const config: Config<Assignment> = {
     // but could make the spreadsheet look nicer.
     dataSheetName: "Late Days",
   },
+  canvas: {
+    // Fetch developer key from canvas APIs and insert here.
+    // If there are no canvasEnabled assignments, this wouldn't affect the code & need not be updated
+    // /src/cavas/README.md for more details.
+    auth_token: "~Insert canvas-infra auth token if canvas enabled~",
+    // Use https://canvas.umn.edu/graphiql APIs to get the details about course ID in the canvas
+    // Also verify that the assignment/HW names are exactly the same with those in the current config file
+    courseId: "365541",
+  },
 };
 
 export default config;
-
-export const auth_token = "~Insert token if canvas enabled~";

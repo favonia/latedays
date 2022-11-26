@@ -11,10 +11,12 @@ let cachedForm: GoogleAppsScript.Forms.Form | null = null;
 
 // global name in index.ts
 const callbackNameOnFormSubmit = "callbackOnFormSubmit";
+const deadlineTriggerName = "deadlineTrigger";
 
 // Update the form with items around today.
 function createDeadlineTriggers(): void {
-  // TODO
+  // One time-driven trigger; everyday at 06:00 in config Timezone
+  ScriptApp.newTrigger(deadlineTriggerName).timeBased().atHour(6).create();
 }
 
 function ensureFormItem(

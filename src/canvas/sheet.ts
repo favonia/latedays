@@ -1,8 +1,9 @@
 import * as sheet from "../sheet";
 import * as form from "../form";
-import { timeDiff } from "../time";
+import { timeDiff, fromISO as newTime, addDays, currentTime } from "../time";
 import { fetchAndWriteUsers, getSubmissions } from "./canvas";
 import config, { Assignment } from "../../config/config";
+import { handleRequest } from "../response";
 
 const rosterSheetName = "Roster Sheet";
 let cachedRosterSheet: GoogleAppsScript.Spreadsheet.Sheet | null = null;
@@ -44,15 +45,10 @@ function rosterEnsure(): GoogleAppsScript.Spreadsheet.Sheet | null {
   return (cachedRosterSheet = fetchRoster());
 }
 
-export function test(): null {
-  getAffectedUsers("Homework 1");
-  return null;
-}
-
 /**
  * lateRequested: late days requested (saved as "used days" in the spreadsheet)
  * lateUsed: late days actually used based on the submission times on canvas
- * refundPossible: Requested days + free days - actual used days
+ * refundPossible: Requested days - |(actual used days - free days)|
  */
 type AutoRefunds = {
   assignment: string;
@@ -115,15 +111,16 @@ export function getAffectedUsers(assignment: string): AutoRefunds {
         userRosterDetails[rHeaders["Canvas_id"]]
       );
       if (submittedTime) {
-        let usedActual = timeDiff(
-          submittedTime,
-          config.assignments[assignment as Assignment].deadline
-        );
+        let usedActual =
+          timeDiff(
+            submittedTime,
+            config.assignments[assignment as Assignment].deadline
+          ) || 0;
         if (useRequested + free > usedActual) {
           result.users.push({
             lateUsed: usedActual,
             lateRequested: useRequested,
-            refundPossible: useRequested + free - usedActual,
+            refundPossible: useRequested - Math.max(0, usedActual - free),
             userId: userId,
             userEmail: userRosterDetails[rHeaders["Email"]],
           });
@@ -132,4 +129,44 @@ export function getAffectedUsers(assignment: string): AutoRefunds {
     }
   });
   return result;
+}
+
+/**
+ * Time based trigger that handles functionalities for the assignments that just passed the hard deadline.
+ * Only for the assignments with canvas enabled flag set true, post deadline late-day usage adjustments are made for
+ *  each user (student). If there are possible refunds, they are automated
+ * TODO: Other functionalities can be added. (email notification for approaching deadlines etc.)
+ * @returns
+ */
+export function assignmentDeadlineTrigger() {
+  Object.entries(config.assignments).forEach(([assignment, values]) => {
+    let hardDeadline = addDays(
+      newTime(values.deadline),
+      config.policy.requestPeriodInDays
+    );
+    let yesterday = addDays(currentTime(), -1);
+    if (
+      values.canvasEnabled &&
+      yesterday.day === hardDeadline.day &&
+      yesterday.month === hardDeadline.month &&
+      yesterday.year === hardDeadline.year
+    ) {
+      let affectedUsers: AutoRefunds = getAffectedUsers(assignment);
+      affectedUsers.users.forEach((u) => {
+        let refundRequest: form.Request = {
+          id: u.userId,
+          email: u.userEmail,
+          assignment: assignment as Assignment,
+          action: {
+            act: "refund",
+            days: u.refundPossible,
+          },
+          time: currentTime(),
+        };
+        handleRequest(refundRequest);
+        // TODO send auto refund email acknowledgement
+        //  can be "cc"-ed to verify
+      });
+    }
+  });
 }

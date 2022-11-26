@@ -26,6 +26,14 @@ function sendEmail(req: form.Request, res: Response): void {
   });
 }
 
+export function handleRequest(request: form.Request): Response {
+  const ds = sheet.ensure();
+  const entry = sheet.readRecord(ds, request.id);
+  const response = updateAndRespond(entry, request);
+  sheet.updateRecord(ds, entry);
+  return response;
+}
+
 /** Validate the student form submission, writes appropriate data into
  ** the late day sheet, emails a proper response.
  **
@@ -33,11 +41,6 @@ function sendEmail(req: form.Request, res: Response): void {
  **/
 export function handle(event: GoogleAppsScript.Events.FormsOnFormSubmit): void {
   const request = form.parseRequest(event.response);
-
-  const ds = sheet.ensure();
-  const entry = sheet.readRecord(ds, request.id);
-  const response = updateAndRespond(entry, request);
-  sheet.updateRecord(ds, entry);
-
+  const response = handleRequest(request);
   sendEmail(request, response);
 }

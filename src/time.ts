@@ -4,6 +4,10 @@ import config from "../config/config";
 // The type of time across the scripts.
 export type Time = DateTime;
 
+export function currentTime(): Time {
+  return DateTime.now().setZone(config.timezone);
+}
+
 export function fromISO(date: string): Time {
   return DateTime.fromISO(date).setZone(config.timezone);
 }
@@ -31,8 +35,9 @@ export function format(t: Time): string {
     .toLocaleString(DateTime.DATETIME_FULL_WITH_SECONDS);
 }
 
+// TODO: verify different tz
 export function timeDiff(submit: string, deadline: string): number {
   const date1 = fromISO(submit);
   const date2 = fromISO(deadline);
-  return Interval.fromDateTimes(date1, date2).length("days");
+  return Math.floor(Interval.fromDateTimes(date1, date2).length("days"));
 }

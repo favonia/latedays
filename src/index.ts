@@ -40,3 +40,6 @@ global.callbackOnFormSubmit = withLock(response.handle);
 
 // @ts-ignore: global
 global.fetchRoster = withLock(canvasSheet.fetchRoster);
+
+// @ts-ignore: global
+global.deadlineTrigger = withLock(canvasSheet.assignmentDeadlineTrigger);

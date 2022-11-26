@@ -1,11 +1,12 @@
-import { auth_token } from "../../config/config";
+import config from "../../config/config";
 import studentInfoQuery from "./queries/studentInfo.graphql";
 import courseInfoQuery from "./queries/courseInfo.graphql";
 import * as queryTypes from "./queryTypes";
 import { idOfEmail } from "../form";
 
 const endpoint = "https://canvas.umn.edu/api/graphql";
-const courseId = "365541";
+const courseId = config.canvas.courseId;
+const auth_token = config.canvas.auth_token;
 
 /**
  * Makes the API call and fetches the submission data for a set of student Ids in an assignment

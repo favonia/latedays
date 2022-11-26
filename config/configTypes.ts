@@ -18,7 +18,7 @@ export interface ActionSummary {
 
 export type Action = ActionRefund | ActionRequest | ActionSummary;
 
-export type AssignmentInfo = { deadline: string; canvasEnabled: boolean };
+export type AssignmentInfo = { deadline: string; canvasEnabled?: boolean };
 
 export type Assignments<Assignment extends string> = Readonly<
   Record<Assignment, AssignmentInfo>
@@ -56,6 +56,11 @@ export interface Policy {
   readonly refundPeriodInDays: number;
 }
 
+export interface CanvasSettings {
+  readonly auth_token: string;
+  readonly courseId: string;
+}
+
 export interface Config<Assignment extends string> {
   readonly timezone: string;
   readonly assignments: Assignments<Assignment>;
@@ -63,4 +68,5 @@ export interface Config<Assignment extends string> {
   readonly form: FormSettings<Assignment>;
   readonly email: EmailSettings;
   readonly sheet: DataSheetSettings;
+  readonly canvas: CanvasSettings;
 }
