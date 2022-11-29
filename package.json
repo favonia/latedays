@@ -37,6 +37,6 @@
   "dependencies": {
     "@types/google-apps-script": "^1.0.56",
     "handlebars": "^4.7.7",
-    "luxon": "^3.1.0"
+    "luxon": "^3.1.1"
   }
 }
