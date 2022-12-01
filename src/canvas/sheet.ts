@@ -80,6 +80,11 @@ export function getAffectedUsers(assignment: string): AutoRefunds {
     .getValues();
   // get non-null user Id rows
   users = users.filter((row) => row[headers[sheet.idHeader]]);
+  const usedHeaderCol = sheet.usedHeader(assignment),
+    freeHeaderCol = sheet.freeHeader(assignment);
+  // filter only the users who requested late days for the given assignment
+  users = users.filter((row) => row[headers[usedHeaderCol]] > 0);
+  console.log(`Affected users for the assignment: ${assignment} are`, users);
   const rosterDs = rosterEnsure();
   if (!rosterDs) return result;
   var roster = rosterDs
@@ -97,8 +102,6 @@ export function getAffectedUsers(assignment: string): AutoRefunds {
     roster.map((r) => r[rHeaders["Canvas_id"]]),
     assignment
   );
-  const usedHeaderCol = sheet.usedHeader(assignment),
-    freeHeaderCol = sheet.freeHeader(assignment);
   users.forEach((row) => {
     let useRequested = Number(row[headers[usedHeaderCol]]),
       free = Number(row[headers[freeHeaderCol]]);
@@ -108,15 +111,14 @@ export function getAffectedUsers(assignment: string): AutoRefunds {
     );
     if (useRequested > 0 && userRosterDetails) {
       let submittedTime = submissions.get(
-        userRosterDetails[rHeaders["Canvas_id"]]
+        String(userRosterDetails[rHeaders["Canvas_id"]])
       );
       if (submittedTime) {
-        let usedActual =
-          timeDiff(
-            submittedTime,
-            config.assignments[assignment as Assignment].deadline
-          ) || 0;
-        if (useRequested + free > usedActual) {
+        let usedActual = timeDiff(
+          submittedTime,
+          config.assignments[assignment as Assignment].deadline
+        );
+        if (usedActual < useRequested + free) {
           result.users.push({
             lateUsed: usedActual,
             lateRequested: useRequested,

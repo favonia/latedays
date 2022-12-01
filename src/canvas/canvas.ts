@@ -36,7 +36,7 @@ export function getSubmissions(
   ).data;
   var submissions = data.course?.submissionsConnection?.nodes;
   let returnSubmissions = new Map<string, string>();
-  for (const [k, va] of Object.entries(submissions || {})) {
+  for (const [k, va] of Object.entries(submissions || [])) {
     var assignmentName = va?.assignment?.name;
     if (va?.user && assignmentName == assignment && va?.submittedAt) {
       returnSubmissions.set(va.user?._id, va.submittedAt);
@@ -68,12 +68,13 @@ export function fetchAndWriteUsers(sheet: GoogleAppsScript.Spreadsheet.Sheet) {
   var values = [];
   for (var user of roster) {
     if (user != undefined) {
-      values.push([
-        idOfEmail(user.loginId || ""),
-        user.email,
-        user._id,
-        user.name,
-      ]);
+      let id = "-";
+      try {
+        id = idOfEmail(user.loginId || "");
+      } catch {
+        // if user login is not a valid email id; could be a bot
+      }
+      values.push([id, user.email, user._id, user.name]);
     }
   }
   sheet.getRange(2, 1, values.length, values[0].length).setValues(values);

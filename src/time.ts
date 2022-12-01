@@ -35,9 +35,13 @@ export function format(t: Time): string {
     .toLocaleString(DateTime.DATETIME_FULL_WITH_SECONDS);
 }
 
-// TODO: verify different tz
+// No. of days submitted after deadline
+//  assumes full day & ignores details when submission & deadline happens in
+//     different timezones / daylight saving changes
+// 0 if submitted before deadline
 export function timeDiff(submit: string, deadline: string): number {
   const date1 = fromISO(submit);
   const date2 = fromISO(deadline);
-  return Math.floor(Interval.fromDateTimes(date1, date2).length("days"));
+  var days = Math.max(0, date1.diff(date2, ["days"]).toObject().days || 0);
+  return Math.floor(days);
 }

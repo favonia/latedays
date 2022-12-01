@@ -30,5 +30,5 @@ To enable Canvas functionalities, run atleast one time after the script-init.
 
 ### Auto Refund of unused late days
 
-For any assignment, use the `canvasEnabled` flag in [config file](../../config/sample.ts) to enable automated refund of the late days. A time-trigger is scheduled currently (daily 6 am CST) that checks for any assignment that has canvasEnabled set true and has a recent deadline passed. Unused late days are refunded based on the submission details from canvas and the requested usage days from the Spreadsheet.
+For any assignment, use the `canvasEnabled` flag in [config file](../../config/sample.ts) to enable automated refund of the late days. A time-trigger is scheduled (daily 6 am CST) that checks for any assignment that: has canvasEnabled set true; and a recent hard deadline passed. Unused late days are refunded based on the submission details from canvas and the requested usage days from the Spreadsheet. Check [assignmentDeadlineTrigger](./canvas.ts)
 [WIP] Send mail acknowledgement to student & cc to course email for verification.
